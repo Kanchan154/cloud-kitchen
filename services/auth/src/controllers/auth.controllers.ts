@@ -6,7 +6,6 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import { oauth2Client } from '../utils/googleConfig.js';
 import axios from 'axios';
 
-
 // login controller
 export const loginUser = TryCatch(async (req, res, next) => {
     const { code } = req.body;
