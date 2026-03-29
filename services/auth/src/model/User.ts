@@ -15,5 +15,4 @@ const schema: Schema<IUSer> = new Schema({
 }, { timestamps: true });
 
 const User = mongoose.model<IUSer>("User", schema);
-
 export default User;
