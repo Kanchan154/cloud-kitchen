@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends Request {
     user?: IUSer | null;
 }
 
+// checking auth middleware
 export const isAuth = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const authHeader = req.headers.authorization;
