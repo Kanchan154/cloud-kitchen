@@ -79,7 +79,6 @@ const SignIn = () => {
     return (
         <View className="items-center justify-center flex-1 px-6 bg-white">
             <Text className="text-2xl font-semibold text-black">Sign in</Text>
-
             <Pressable
                 className="items-center w-full py-3 mt-6 bg-black rounded-full"
                 disabled={isSubmitting}
