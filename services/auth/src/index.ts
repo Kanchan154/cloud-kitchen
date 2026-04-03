@@ -12,7 +12,6 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);       // auth route
 
-
 // Error route
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     ENV.NODE_ENV === "development" ? res.status(500).json({ message: err.message }) : res.status(500).json({ message: "Something went wrong" });
