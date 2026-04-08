@@ -37,6 +37,7 @@ export const loginUser = TryCatch(async (req, res, next) => {
     res.status(200).json({ message: "User logged in successfully", token, user });
 });
 
+// allowed roles only
 const allowedRoles = ["customer", "seller", "rider"] as const;
 type Role = typeof allowedRoles[number];
 
