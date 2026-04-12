@@ -6,6 +6,7 @@ import { USER_ROLE } from "../types";
 import { ToastAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// interface for the useAuthStore function
 interface AUTHSTORE {
     user: USER | null;
     token: string | null;
@@ -27,6 +28,7 @@ interface AUTHSTORE {
     }>;
 }
 
+// useAuthStore Function using Zustand for global state management
 export const useAuthStore = create<AUTHSTORE>((set, get) => ({
     user: null,
     token: null,
@@ -153,6 +155,5 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 isCheckingAuth: false
             })
         }
-
     }
 }))
