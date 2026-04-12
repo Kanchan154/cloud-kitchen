@@ -119,8 +119,6 @@ const SignIn = () => {
             }
 
             const authCode = response.data.serverAuthCode;
-            console.log(response.data)
-
             if (!authCode) {
                 throw new Error("No authorization code returned from Google.");
             }

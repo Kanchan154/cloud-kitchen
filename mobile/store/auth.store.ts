@@ -10,6 +10,7 @@ interface AUTHSTORE {
     user: USER | null;
     token: string | null;
     isCheckingAuth: boolean;
+    isAuthenticated: boolean;
     login: (code: string) => Promise<{
         message: string;
         flag: boolean;
@@ -30,6 +31,7 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
     user: null,
     token: null,
     isCheckingAuth: true,
+    isAuthenticated: false,
     // login controller
     login: async (code) => {
         try {
@@ -39,7 +41,8 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
             }
             set({
                 user: res.data.user,
-                token: res.data.token
+                token: res.data.token,
+                isAuthenticated: true
             })
             await AsyncStorage.setItem("token", res.data.token);
             ToastAndroid.show(res.data.message, ToastAndroid.SHORT);
@@ -132,7 +135,8 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
             }
             set({
                 user: res.data.user,
-                token
+                token,
+                isAuthenticated: true
             })
             return {
                 flag: true,
