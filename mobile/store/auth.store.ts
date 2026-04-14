@@ -54,7 +54,6 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 token: res.data.token,
                 isAuthenticated: true
             })
-            console.log(res.data)
             await AsyncStorage.setItem("token", res.data.token);
             showToast(res.data?.message, "Logged in successfully");
             return {
