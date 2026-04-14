@@ -86,7 +86,17 @@ const SignIn = () => {
         try {
             const res = await login(authCode);
             if (res.flag && res.role) {
-                router.push("/(tabs)");
+                let targetRoute: "/customer/(tabs)" | "/seller/(tabs)" | "/rider/(tabs)";
+
+                if (res.role === "customer") {
+                    targetRoute = "/customer/(tabs)";
+                } else if (res.role === "seller") {
+                    targetRoute = "/seller/(tabs)";
+                } else {
+                    targetRoute = "/rider/(tabs)";
+                }
+
+                router.push(targetRoute);
             } else if (res.flag && !res.role) {
                 router.push("/chooseRole");
             }
@@ -112,6 +122,13 @@ const SignIn = () => {
         setErrorMessage(null);
 
         try {
+            try {
+                // Ensure previous Google session is cleared so the user can pick a different account
+                await GoogleSignin.signOut();
+            } catch (signOutError) {
+                // Ignore sign-out errors; we just want to reset any cached session
+            }
+
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
             const response = await GoogleSignin.signIn();
             if (response.type !== "success" || !response.data) {

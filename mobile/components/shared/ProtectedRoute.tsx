@@ -17,14 +17,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }, [checkAuth, isCheckingAuth]);
 
     const isAuthScreen = segments[0] === "(auth)";
-    const isTabScreen = segments[0] === "(tabs)";
 
     if (isCheckingAuth) return <AppSplashScreen />;
 
     if (isAuthScreen && user && isAuthenticated) {
-        if (user.role) return <Redirect href="/(tabs)" />
+        if (user.role === "customer") return <Redirect href="/customer/(tabs)" />
+        else if (user.role === "rider") return <Redirect href="/rider/(tabs)" />
+        else if (user.role === "seller") return <Redirect href="/seller/(tabs)" />
     } else if (user && !user.role) return <Redirect href="/chooseRole" />
-    else if (isTabScreen && !user) return <Redirect href="/(auth)" />
+    else if (!isAuthScreen && !user) return <Redirect href="/(auth)" />
 
     return <View className='flex-1'>{children}</View>
 }

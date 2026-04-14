@@ -15,3 +15,9 @@ export type RoleOption = {
     subtitle: string;
     icon: keyof typeof MaterialCommunityIcons.glyphMap;
 };
+
+export type LocationData = {
+    latitude: number;
+    longitude: number;
+    formattedAddress: string;
+}

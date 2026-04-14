@@ -6,6 +6,13 @@ import { USER_ROLE } from "../types";
 import { ToastAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const showToast = (message: unknown, fallback: string) => {
+    const text = typeof message === "string" && message.trim().length > 0
+        ? message
+        : fallback;
+    ToastAndroid.show(text, ToastAndroid.SHORT);
+};
+
 // interface for the useAuthStore function
 interface AUTHSTORE {
     user: USER | null;
@@ -26,6 +33,7 @@ interface AUTHSTORE {
         flag: boolean;
         role: string;
     }>;
+    logout: () => Promise<void>;
 }
 
 // useAuthStore Function using Zustand for global state management
@@ -46,8 +54,9 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 token: res.data.token,
                 isAuthenticated: true
             })
+            console.log(res.data)
             await AsyncStorage.setItem("token", res.data.token);
-            ToastAndroid.show(res.data.message, ToastAndroid.SHORT);
+            showToast(res.data?.message, "Logged in successfully");
             return {
                 message: res.data.message,
                 flag: true,
@@ -55,15 +64,15 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
             }
         } catch (error: any) {
             if (error instanceof AxiosError) {
-                ToastAndroid.show(error.response?.data.message, ToastAndroid.SHORT);
+                showToast(error.response?.data?.message, "Login failed");
                 return {
-                    message: error.response?.data.message,
+                    message: error.response?.data?.message || "Login failed",
                     flag: false,
                     role: ""
                 }
             }
             else {
-                ToastAndroid.show("Login Failed", ToastAndroid.SHORT);
+                showToast(null, "Login Failed");
                 return {
                     message: "Login Failed",
                     flag: false,
@@ -90,7 +99,7 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 token: res.data.token
             })
             await AsyncStorage.setItem("token", res.data.token);
-            ToastAndroid.show(res.data.message, ToastAndroid.SHORT);
+            showToast(res.data?.message, "Role updated");
             return {
                 flag: true,
                 message: res.data.message,
@@ -99,15 +108,15 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
 
         } catch (error: any) {
             if (error instanceof AxiosError) {
-                ToastAndroid.show(error.response?.data.message, ToastAndroid.SHORT);
+                showToast(error.response?.data?.message, "User role update failed");
                 return {
                     flag: false,
-                    message: error.response?.data.message,
+                    message: error.response?.data?.message || "User role update failed",
                     role: ""
                 }
             }
             else {
-                ToastAndroid.show("User role update failed", ToastAndroid.SHORT);
+                showToast(null, "User role update failed");
                 return {
                     flag: false,
                     message: "User role update failed",
@@ -155,5 +164,14 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 isCheckingAuth: false
             })
         }
+    },
+    logout: async () => {
+        await AsyncStorage.removeItem("token");
+        set({
+            user: null,
+            token: null,
+            isAuthenticated: false
+        })
+        showToast(null, "Logout Successfully");
     }
 }))

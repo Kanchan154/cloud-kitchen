@@ -6,89 +6,99 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Animated, {
-    Easing,
-    FadeInDown,
-    FadeInUp,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withSequence,
-    withTiming,
+  Easing,
+  FadeInDown,
+  FadeInUp,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 
 import type { RoleOption } from "@/types";
 
 
 const ChooseRole = () => {
-    const router = useRouter();
-    const { chooseRole } = useAuthStore();
-    const [selectedRole, setSelectedRole] = useState<USER_ROLE | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { chooseRole } = useAuthStore();
+  const [selectedRole, setSelectedRole] = useState<USER_ROLE | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const pulse = useSharedValue(0);
-    const float = useSharedValue(0);
+  const pulse = useSharedValue(0);
+  const float = useSharedValue(0);
 
-    useEffect(() => {
-        pulse.value = withRepeat(
-            withSequence(
-                withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }),
-                withTiming(0, { duration: 2200, easing: Easing.in(Easing.quad) })
-            ),
-            -1,
-            false
-        );
-
-        float.value = withRepeat(
-            withSequence(
-                withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }),
-                withTiming(0, { duration: 2600, easing: Easing.inOut(Easing.sin) })
-            ),
-            -1,
-            false
-        );
-    }, [float, pulse]);
-
-    const orbStyle = useAnimatedStyle(() => ({
-        transform: [
-            { scale: interpolate(pulse.value, [0, 1], [0.92, 1.1]) },
-            { translateY: interpolate(float.value, [0, 1], [0, -18]) },
-        ],
-        opacity: interpolate(pulse.value, [0, 1], [0.6, 0.95]),
-    }));
-
-    const cardFloatStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: interpolate(float.value, [0, 1], [0, -8]) }],
-    }));
-
-    const selectedRoleDetails = useMemo(
-        () => ROLE_OPTIONS.find((option) => option.id === selectedRole),
-        [selectedRole]
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2200, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 2200, easing: Easing.in(Easing.quad) })
+      ),
+      -1,
+      false
     );
 
-    const handleContinue = async () => {
-        if (!selectedRole || isSubmitting) {
-            return;
-        }
+    float.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 2600, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      false
+    );
+  }, [float, pulse]);
 
-        setErrorMessage(null);
-        setIsSubmitting(true);
+  const orbStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: interpolate(pulse.value, [0, 1], [0.92, 1.1]) },
+      { translateY: interpolate(float.value, [0, 1], [0, -18]) },
+    ],
+    opacity: interpolate(pulse.value, [0, 1], [0.6, 0.95]),
+  }));
 
-        try {
-            const response = await chooseRole(selectedRole);
-            if (!response.flag) {
-                throw new Error(response.message);
-            }
-            router.replace("/(tabs)");
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : "Unable to set role.";
-            setErrorMessage(message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+  const cardFloatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(float.value, [0, 1], [0, -8]) }],
+  }));
+
+  const selectedRoleDetails = useMemo(
+    () => ROLE_OPTIONS.find((option) => option.id === selectedRole),
+    [selectedRole]
+  );
+
+  const handleContinue = async () => {
+    if (!selectedRole || isSubmitting) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await chooseRole(selectedRole);
+      if (!response.flag) {
+        throw new Error(response.message);
+      }
+      let targetRoute: "/customer/(tabs)" | "/seller/(tabs)" | "/rider/(tabs)";
+
+      if (response.role === "customer") {
+        targetRoute = "/customer/(tabs)";
+      } else if (response.role === "seller") {
+        targetRoute = "/seller/(tabs)";
+      } else {
+        targetRoute = "/rider/(tabs)";
+      }
+
+      router.push(targetRoute);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to set role.";
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <View className="flex-1" style={{ backgroundColor: AUTH_COLORS.background }}>
