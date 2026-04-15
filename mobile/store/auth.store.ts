@@ -1,10 +1,11 @@
-import { USER } from "@/types";
+import { LocationData, USER } from "@/types";
 import { create } from "zustand"
 import axios, { AxiosError } from "axios";
 import { BASE_API_URL } from "@/constants";
 import { USER_ROLE } from "../types";
 import { ToastAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 
 const showToast = (message: unknown, fallback: string) => {
     const text = typeof message === "string" && message.trim().length > 0
@@ -19,11 +20,13 @@ interface AUTHSTORE {
     token: string | null;
     isCheckingAuth: boolean;
     isAuthenticated: boolean;
+    city: string | null;
     login: (code: string) => Promise<{
         message: string;
         flag: boolean;
         role: string;
     }>;
+    location: LocationData | null;
     chooseRole: (role: USER_ROLE) => Promise<{
         flag: boolean;
         message: string;
@@ -33,6 +36,7 @@ interface AUTHSTORE {
         flag: boolean;
         role: string;
     }>;
+    getLocation: () => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -42,6 +46,8 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
     token: null,
     isCheckingAuth: true,
     isAuthenticated: false,
+    location: null,
+    city: null,
     // login controller
     login: async (code) => {
         try {
@@ -164,6 +170,57 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
             })
         }
     },
+    // get location controller
+    getLocation: async () => {
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+
+            if (status !== "granted") {
+                showToast("Location permission denied", "Location permission denied");
+                return;
+            }
+
+            const position = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = position.coords;
+
+            let formattedAddress = "";
+            let city = "";
+
+            try {
+                const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+                if (geocode && geocode.length > 0) {
+                    const place = geocode[0];
+                    const parts = [
+                        place.name,
+                        place.street,
+                        place.city,
+                        place.region,
+                        place.postalCode,
+                        place.country
+                    ].filter(Boolean);
+                    formattedAddress = parts.join(", ");
+                    city=place.city || place.district || "Your City"
+                }
+            } catch {
+                formattedAddress = "";
+                city=""
+            }
+
+            set({
+                location: {
+                    latitude,
+                    longitude,
+                    formattedAddress,
+                } as LocationData,
+                city: city
+            });
+
+            showToast("Location fetched successfully", "Location fetched successfully");
+        } catch (error) {
+            showToast("Failed to fetch location", "Failed to fetch location");
+        }
+    },
+    // logout controller
     logout: async () => {
         await AsyncStorage.removeItem("token");
         set({

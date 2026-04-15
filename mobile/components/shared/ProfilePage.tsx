@@ -11,7 +11,7 @@ import { AUTH_COLORS } from "@/constants";
 import { useAuthStore } from "@/store/auth.store";
 
 const ProfilePage = () => {
-    const { user, logout } = useAuthStore();
+    const { user, logout, location } = useAuthStore();
 
     const cardScale = useSharedValue(0.96);
     const cardTranslateY = useSharedValue(18);
@@ -316,7 +316,7 @@ const ProfilePage = () => {
                             className="text-xs"
                             style={{ color: AUTH_COLORS.textSubtle }}
                         >
-                            address-current -to do
+                            {location?.formattedAddress || "Not set"}
                         </Text>
                     </Pressable>
                     <Pressable
