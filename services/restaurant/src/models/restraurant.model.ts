@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+// interface for the Schema
 export interface IRestaurant extends Document {
     name: string;
     description: string;
@@ -16,6 +17,7 @@ export interface IRestaurant extends Document {
     createdAt: Date;
 }
 
+// restaurant Schema
 const RestaurantSchema = new mongoose.Schema<IRestaurant>({
     name: {
         type: String,
