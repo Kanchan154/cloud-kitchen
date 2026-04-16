@@ -3,6 +3,7 @@ import cloudinary from 'cloudinary'
 
 const router = express.Router();
 
+// upload file route
 router.post('/upload', async (req, res) => {
     try {
         const { buffer } = req.body;
