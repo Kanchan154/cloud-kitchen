@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from "../middleware/isAuth.js";
 import TryCatch from "../middleware/trycatch.js";
 import RestaurantModel from "../models/restraurant.model.js";
 import { ENV } from "../config/ENV.js";
+import jwt from "jsonwebtoken";
 
 export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
     const user = req.user;
@@ -59,4 +60,25 @@ export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => 
         }
     });
     res.status(201).json({ message: "Restaurant created successfully", restaurant });
+})
+
+export const fetchMyRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized - User not found" });
+    }
+    // fetch restaurant
+    const restaurant = await RestaurantModel.findOne({ ownerId: req.user._id });
+    if (!restaurant) {
+        return res.status(404).json({ message: "Restaurant not found" });
+    }
+    if (!req.user?.restaurantId) {
+        const token = jwt.sign({
+            user: {
+                ...req.user,
+                restaurantId: restaurant._id
+            }
+        }, ENV.JWT_SECRET as string, { expiresIn: '15d' });
+        res.status(200).json({ message: "Restaurant fetched successfully", restaurant, token });
+    }
+    res.json({ message: "Restaurant fetched successfully", restaurant });
 })

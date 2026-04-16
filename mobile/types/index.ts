@@ -21,3 +21,33 @@ export type LocationData = {
     longitude: number;
     formattedAddress: string;
 }
+
+
+
+// type for restaurant
+export type IRestaurant = {
+    _id: string;
+    name: string;
+    description: string;
+    image: string;
+    ownerId: string;
+    phone: number;
+    isVerified: boolean;
+    autoLocation: {
+        type: "Point",
+        coordinates: [number, number];
+        formattedAddress: string;
+    };
+    isOpen: boolean;
+    createdAt: Date;
+}
+
+export type RestaurantInputType = {
+    name: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    formattedAddress: string;
+    phone: number;
+    file: string
+}

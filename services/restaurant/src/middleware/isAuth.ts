@@ -9,6 +9,7 @@ export interface IUSer {
     email: string;
     image: string;
     role: string;
+    restaurantId: string
 }
 
 export interface AuthenticatedRequest extends Request {
