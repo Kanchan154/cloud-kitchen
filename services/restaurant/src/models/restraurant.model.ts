@@ -60,4 +60,5 @@ const RestaurantSchema = new mongoose.Schema<IRestaurant>({
 
 RestaurantSchema.index({ autoLocation: "2dsphere" });
 
-export default mongoose.model<IRestaurant>("Restaurant", RestaurantSchema);
+const RestaurantModel = mongoose.model<IRestaurant>("Restaurant", RestaurantSchema);
+export default RestaurantModel;
