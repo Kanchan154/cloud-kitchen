@@ -38,28 +38,40 @@ export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => 
     }
 
     // upload image to cloudinary
-    const { data: uploadResult } = await axios.post(`${ENV.UTILS_URI}/api/cloud/upload`, {
-        buffer: fileBuffer.content,
-    });
+    try {
+        const { data: uploadResult } = await axios.post(`${ENV.UTILS_URI}/api/cloud/upload`, {
+            buffer: fileBuffer.content,
+        }, {
+            timeout: 30000,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+        });
 
-    if (!uploadResult?.url) {
-        return res.status(500).json({ message: "Failed to upload image to cloudinary" });
-    }
-
-    // create a new restaurant
-    const restaurant = await RestaurantModel.create({
-        ownerId: user._id,
-        name,
-        description,
-        image: uploadResult.url,
-        phone,
-        autoLocation: {
-            type: "Point",
-            coordinates: [Number(longitude), Number(latitude)],
-            formattedAddress
+        if (!uploadResult?.url) {
+            return res.status(500).json({ message: "Failed to upload image to cloudinary" });
         }
-    });
-    res.status(201).json({ message: "Restaurant created successfully", restaurant });
+        // create a new restaurant
+        const restaurant = await RestaurantModel.create({
+            ownerId: user._id,
+            name,
+            description,
+            image: uploadResult.url,
+            phone,
+            autoLocation: {
+                type: "Point",
+                coordinates: [Number(longitude), Number(latitude)],
+                formattedAddress
+            }
+        });
+        res.status(201).json({ message: "Restaurant created successfully", restaurant });
+    } catch (uploadError: any) {
+        const upstreamMessage = uploadError?.response?.data?.message || uploadError?.response?.data?.error;
+        console.error("Cloudinary upload error:", uploadError.message, upstreamMessage || "");
+        return res.status(500).json({
+            message: "Failed to upload image to cloudinary",
+            error: upstreamMessage || uploadError.message
+        });
+    }
 })
 
 export const fetchMyRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {

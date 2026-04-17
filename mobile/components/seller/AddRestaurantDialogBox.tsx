@@ -19,7 +19,6 @@ import {
 
 type Props = {
   visible: boolean;
-  onClose: () => void;
 };
 
 type FormErrors = Partial<Record<'name' | 'description' | 'phone' | 'image' | 'location', string>>;
@@ -34,7 +33,7 @@ const initialFormState = (location: ReturnType<typeof useAuthStore.getState>['lo
   formattedAddress: location?.formattedAddress ?? '',
 });
 
-const AddRestaurantDialogBox = ({ visible, onClose }: Props) => {
+const AddRestaurantDialogBox = ({ visible }: Props) => {
   const location = useAuthStore((state) => state.location);
   const [form, setForm] = useState(initialFormState(location));
   const [errors, setErrors] = useState<FormErrors>({});
@@ -132,7 +131,7 @@ const AddRestaurantDialogBox = ({ visible, onClose }: Props) => {
 
     setIsSubmitting(true);
     try {
-      const success = await addRestaurant({
+      await addRestaurant({
         name: form.name.trim(),
         description: form.description.trim(),
         file: form.imageUri as string,
@@ -140,11 +139,11 @@ const AddRestaurantDialogBox = ({ visible, onClose }: Props) => {
         latitude: form.latitude,
         longitude: form.longitude,
         phone: Number(form.phone),
-      });
-
-      if (success) {
-        handleClose();
-      }
+      }).then((success) => {
+        if (success) {
+          handleClose();
+        }
+      })
     } finally {
       setIsSubmitting(false);
     }
@@ -153,7 +152,6 @@ const AddRestaurantDialogBox = ({ visible, onClose }: Props) => {
   const handleClose = () => {
     setErrors({});
     setForm(initialFormState(location));
-    onClose();
   };
 
   const hasLocation = Boolean(location?.formattedAddress && location.latitude && location.longitude);

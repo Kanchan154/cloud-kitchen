@@ -23,6 +23,7 @@ interface UseSellerStoreInterface {
 export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
     myRestaurant: null,
     isFetching: true,
+    // get my restaurant controller
     getMyRestaurant: async () => {
         try {
             set({ isFetching: true })
@@ -58,6 +59,7 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
             set({ isFetching: false })
         }
     },
+    // add my restaurant controller
     addRestaurant: async (input: RestaurantInputType) => {
         try {
             const token = useAuthStore.getState().token;
@@ -82,11 +84,10 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
                 name: fileName,
                 type: mimeType,
             } as any);
-            
-            console.log(formData)
             const res = await axios.post(RESTAURANT_API_ENDPOINTS.ADD_RESTAURANT, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
                 },
             });
 
@@ -99,20 +100,18 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
                         token: res.data.token,
                     });
                 }
-
                 showToast(res.data?.message, "Restaurant created successfully");
                 return true;
             }
 
             throw new Error(res.data?.message || "Failed to create restaurant");
-
-        } catch (error) {
+            
+        } catch (error:any) {
             if (error instanceof AxiosError) {
                 showToast(error.response?.data?.message, "Failed to create restaurant");
             } else {
                 showToast((error as any)?.message, "Failed to create restaurant");
             }
-
         }
         return false;
     }
