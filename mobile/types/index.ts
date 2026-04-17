@@ -5,6 +5,7 @@ export type USER = {
     email: string;
     image: string;
     role?: string;
+    restaurantId?: string;
 }
 
 export type USER_ROLE = "customer" | "seller" | "rider";
