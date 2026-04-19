@@ -51,3 +51,12 @@ export type RestaurantInputType = {
     phone: number;
     file: string
 }
+
+export type RestaurantUpdateInputType = {
+    name: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    formattedAddress: string;
+    phone: number;
+}

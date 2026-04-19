@@ -5,7 +5,9 @@ import TryCatch from "../middleware/trycatch.js";
 import RestaurantModel from "../models/restraurant.model.js";
 import { ENV } from "../config/ENV.js";
 import jwt from "jsonwebtoken";
+import { stat } from "fs";
 
+// add restaurant
 export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
     const user = req.user;
 
@@ -74,6 +76,7 @@ export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => 
     }
 })
 
+// fetch my restaurant
 export const fetchMyRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthorized - User not found" });
@@ -94,3 +97,43 @@ export const fetchMyRestaurant = TryCatch(async (req: AuthenticatedRequest, res)
     }
     res.json({ message: "Restaurant fetched successfully", restaurant });
 })
+
+// update restaurant status
+export const updateRestaurantStatus = TryCatch(async (req: AuthenticatedRequest, res) => {
+    if (!req.user) {
+        return res.status(403).json({ message: "Unauthorized - User not found" });
+    }
+    const { status } = req.body;
+    if (typeof status !== "boolean") {
+        return res.status(400).json({ message: "Status must be a boolean" });
+    }
+
+    const restaurant = await RestaurantModel.findOneAndUpdate(
+        { ownerId: req.user._id },
+        { $set: { isOpen: status } },
+        { new: true }
+    )
+
+    if (!restaurant) {
+        return res.status(404).json({ message: "Restaurant not found" });
+    }
+    res.status(200).json({ message: "Restaurant status updated successfully", restaurant });
+})
+
+// update restaurant details
+export const updateRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
+    if (!req.user) {
+        return res.status(403).json({ message: "Unauthorized - User not found" });
+    }
+    const data = req.body;
+    const restaurant = await RestaurantModel.findOneAndUpdate(
+        { ownerId: req.user._id },
+        { $set: data },
+        { new: true }
+    )
+    if (!restaurant) {
+        return res.status(404).json({ message: "Restaurant not found" });
+    }
+    res.status(200).json({ message: "Restaurant updated successfully", restaurant });
+})
+

@@ -3,14 +3,17 @@ import { IRestaurant } from '@/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import Background from '../shared/Background';
+import { useSellerStore } from '@/store/seller.store';
+import UpdateRestaurantDialogBox from './UpdateRestaurantDialogBox';
 
 type Props = {
     restaurant: IRestaurant;
 };
 
 const MyRestraunt = ({ restaurant }: Props) => {
-    const [isOpen, setIsOpen] = useState(restaurant.isOpen);
     const { height } = useWindowDimensions();
+    const { updateRestaurantStatus } = useSellerStore();
 
     const formattedPhone = useMemo(() => {
         const phone = String(restaurant.phone);
@@ -21,49 +24,19 @@ const MyRestraunt = ({ restaurant }: Props) => {
     const latitude = coordinates[1] ?? 0;
     const longitude = coordinates[0] ?? 0;
     const heroHeight = Math.max(240, Math.min(360, height * 0.36));
+    const [isVisible, setisVisible] = useState(false);
 
     const handleToggleOpen = () => {
-        const nextValue = !isOpen;
-        setIsOpen(nextValue);
-        Alert.alert(
-            nextValue ? 'Restaurant opened' : 'Restaurant paused',
-            nextValue
-                ? 'Customers can now see the restaurant as open.'
-                : 'The restaurant is now marked as closed for customers.',
-        );
+        updateRestaurantStatus();
     };
 
     const handleAction = (label: string) => {
-        Alert.alert(label, 'Hook this action to your seller workflow next.');
+        setisVisible(true);
     };
 
     return (
-        <View className="flex-1" style={{ backgroundColor: AUTH_COLORS.background }}>
-            <View
-                className="absolute"
-                style={{
-                    width: 260,
-                    height: 260,
-                    borderRadius: 130,
-                    backgroundColor: AUTH_COLORS.accent,
-                    opacity: 0.16,
-                    top: -80,
-                    right: -60,
-                }}
-            />
-            <View
-                className="absolute"
-                style={{
-                    width: 320,
-                    height: 320,
-                    borderRadius: 160,
-                    backgroundColor: AUTH_COLORS.primary,
-                    opacity: 0.12,
-                    bottom: -130,
-                    left: -90,
-                }}
-            />
-
+        <Background>
+            <UpdateRestaurantDialogBox visible={isVisible} onClose={() => setisVisible(false)} />
             <ScrollView
                 className="flex-1"
                 contentContainerStyle={{ paddingVertical: 20 }}
@@ -87,9 +60,9 @@ const MyRestraunt = ({ restaurant }: Props) => {
 
                             <View className="absolute flex-row items-center justify-between top-4 left-4 right-4">
                                 <View className="flex-row flex-wrap flex-1 gap-5 pr-3">
-                                    <View className={`px-3 py-2 border rounded-full ${isOpen ? 'bg-green-500' : 'bg-red-500'}`} style={{ borderColor: 'rgba(255,255,255,0.16)' }}>
+                                    <View className={`px-3 py-2 border rounded-full ${restaurant.isOpen ? 'bg-green-500' : 'bg-red-500'}`} style={{ borderColor: 'rgba(255,255,255,0.16)' }}>
                                         <Text className="text-[11px] font-bold uppercase" style={{ color: AUTH_COLORS.textPrimary }}>
-                                            {isOpen ? 'Open now' : 'Closed'}
+                                            {restaurant.isOpen ? 'Open now' : 'Closed'}
                                         </Text>
                                     </View>
 
@@ -178,13 +151,13 @@ const MyRestraunt = ({ restaurant }: Props) => {
                                             onPress={handleToggleOpen}
                                             className="px-4 py-3 rounded-full"
                                             style={{
-                                                backgroundColor: isOpen ? 'rgba(16,185,129,0.18)' : 'rgba(239,68,68,0.18)',
+                                                backgroundColor: restaurant.isOpen ? 'rgba(16,185,129,0.18)' : 'rgba(239,68,68,0.18)',
                                                 borderWidth: 1,
-                                                borderColor: isOpen ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.28)',
+                                                borderColor: restaurant.isOpen ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.28)',
                                             }}
                                         >
-                                            <Text className="text-xs font-extrabold uppercase" style={{ color: isOpen ? '#34d399' : '#fca5a5' }}>
-                                                {isOpen ? 'Open' : 'Closed'}
+                                            <Text className="text-xs font-extrabold uppercase" style={{ color: restaurant.isOpen ? '#34d399' : '#fca5a5' }}>
+                                                {restaurant.isOpen ? 'Open' : 'Closed'}
                                             </Text>
                                         </Pressable>
                                     </View>
@@ -213,7 +186,7 @@ const MyRestraunt = ({ restaurant }: Props) => {
                     </View>
                 </View>
             </ScrollView>
-        </View>
+        </Background>
     );
 };
 

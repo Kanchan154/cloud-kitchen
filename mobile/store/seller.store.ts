@@ -1,5 +1,5 @@
 import { RESTAURANT_API_ENDPOINTS } from "@/constants";
-import { IRestaurant, RestaurantInputType } from "@/types";
+import { IRestaurant, RestaurantInputType, RestaurantUpdateInputType } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
@@ -14,10 +14,15 @@ const showToast = (message: unknown, fallback: string) => {
 };
 
 interface UseSellerStoreInterface {
+    // variables
     myRestaurant: IRestaurant | null;
+    isFetching: boolean
+
+    // functions
     getMyRestaurant: () => Promise<void>;
     addRestaurant: (input: RestaurantInputType) => Promise<boolean>;
-    isFetching: boolean
+    updateRestaurantStatus: () => Promise<void>;
+    updateRestaurant: (input: RestaurantUpdateInputType) => Promise<boolean>;
 }
 
 export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
@@ -105,8 +110,8 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
             }
 
             throw new Error(res.data?.message || "Failed to create restaurant");
-            
-        } catch (error:any) {
+
+        } catch (error: any) {
             if (error instanceof AxiosError) {
                 showToast(error.response?.data?.message, "Failed to create restaurant");
             } else {
@@ -114,5 +119,67 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
             }
         }
         return false;
+    },
+    // update my restaurant controller
+    updateRestaurantStatus: async () => {
+        try {
+            const token = useAuthStore.getState().token;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+            const status = get().myRestaurant?.isOpen;
+            const response = await axios.put(`${RESTAURANT_API_ENDPOINTS.UPDATE_RESTAURANT_STATUS}`,
+                { status: !status },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            if (response.status === 400) throw new Error(response.data.message);
+            set({
+                myRestaurant: response.data.restaurant,
+            })
+            showToast(response.data?.message, "Status updated successfully");
+
+        } catch (error: any) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Failed to update status");
+            } else {
+                showToast((error as any)?.message, "Failed to update status");
+            }
+        }
+    },
+    // update restaurant Status
+    updateRestaurant: async (input: RestaurantUpdateInputType) => {
+        try {
+            const token = useAuthStore.getState().token;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+            const response = await axios.put(`${RESTAURANT_API_ENDPOINTS.UPDATE_RESTAURANT}`,
+                input,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            if (response.status === 400) {
+                throw new Error(response.data.message);
+            }
+            set({
+                myRestaurant: response.data.restaurant
+            })
+            showToast(response.data?.message, "Restaurant updated successfully");
+            return true
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Failed to create restaurant");
+            } else {
+                showToast((error as any)?.message, "Failed to create restaurant");
+            }
+        }
+        return false
     }
 }));

@@ -48,5 +48,7 @@ export const AUTH_API_ENDPOINTS = {
 
 export const RESTAURANT_API_ENDPOINTS = {
     ADD_RESTAURANT: `${BASE_API_RESTAURANT_URL}/add-restaurant`,
-    FETCH_MY_RESTAURANT: `${BASE_API_RESTAURANT_URL}/get-my-restaurant`
+    FETCH_MY_RESTAURANT: `${BASE_API_RESTAURANT_URL}/get-my-restaurant`,
+    UPDATE_RESTAURANT_STATUS: `${BASE_API_RESTAURANT_URL}/update-status`,
+    UPDATE_RESTAURANT:`${BASE_API_RESTAURANT_URL}/update-restaurant`
 }

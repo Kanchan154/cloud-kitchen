@@ -1,11 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
+import Background from '@/components/shared/Background'
 
 const menu = () => {
   return (
-    <View>
+    <Background>
       <Text>menu</Text>
-    </View>
+    </Background>
   )
 }
 
