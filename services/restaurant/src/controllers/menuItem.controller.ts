@@ -8,16 +8,17 @@ import { ENV } from "../config/ENV.js";
 
 // add new menu item
 export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
+    // get the user
     if (!req.user) {
         return res.status(403).json({ message: "Unauthorized - User not found" });
     }
-
+    // get the restaurant
     const restaurant = await RestaurantModel.findOne({ ownerId: req.user._id });
 
     if (!restaurant) {
         return res.status(404).json({ message: "Restaurant not found" });
     }
-
+    // getting the input
     const { name, description, price } = req.body;
     if (!(name && price)) {
         return res.status(400).json({ message: "Name and price are required" });
@@ -45,6 +46,7 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
             maxBodyLength: Infinity,
         });
 
+        // getting the upload url
         if (!uploadResult?.url) {
             return res.status(500).json({ message: "Failed to upload image to cloudinary" });
         }
@@ -70,9 +72,11 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
 
 // get all menu items
 export const getAllMenuItems = TryCatch(async (req: AuthenticatedRequest, res) => {
+    // get id of restaurant
     const { id } = req.params;
     if (!id) return res.status(404).json({ message: "Restaurant not found" });
 
+    // getting the menu items
     const items = await MenuItemModel.find({ restaurantId: id });
     res.status(200).json({ items });
 })
