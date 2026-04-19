@@ -50,5 +50,10 @@ export const RESTAURANT_API_ENDPOINTS = {
     ADD_RESTAURANT: `${BASE_API_RESTAURANT_URL}/add-restaurant`,
     FETCH_MY_RESTAURANT: `${BASE_API_RESTAURANT_URL}/get-my-restaurant`,
     UPDATE_RESTAURANT_STATUS: `${BASE_API_RESTAURANT_URL}/update-status`,
-    UPDATE_RESTAURANT:`${BASE_API_RESTAURANT_URL}/update-restaurant`
+    UPDATE_RESTAURANT:`${BASE_API_RESTAURANT_URL}/update-restaurant`,
+    
+    ADD_MENU_ITEM: `${BASE_API_RESTAURANT_URL}/menu-item/add-new`,
+    TOGGLE_MENU_ITEM_AVAILABILITY: `${BASE_API_RESTAURANT_URL}/menu-item/toggle-availability`,
+    DELETE_MENU_ITEM: `${BASE_API_RESTAURANT_URL}/menu-item/delete`,
+    GET_ALL_MENU_ITEMS: `${BASE_API_RESTAURANT_URL}/menu-item/get-all`,
 }

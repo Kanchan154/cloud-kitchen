@@ -1,5 +1,5 @@
 import { RESTAURANT_API_ENDPOINTS } from "@/constants";
-import { IRestaurant, RestaurantInputType, RestaurantUpdateInputType } from "@/types";
+import { IRestaurant, MenuItemInputType, MenuItemsType, RestaurantInputType, RestaurantUpdateInputType } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
@@ -17,17 +17,23 @@ interface UseSellerStoreInterface {
     // variables
     myRestaurant: IRestaurant | null;
     isFetching: boolean
+    menuItemList: MenuItemsType[]
 
     // functions
     getMyRestaurant: () => Promise<void>;
     addRestaurant: (input: RestaurantInputType) => Promise<boolean>;
     updateRestaurantStatus: () => Promise<void>;
     updateRestaurant: (input: RestaurantUpdateInputType) => Promise<boolean>;
+    addMenuItem: (input: MenuItemInputType) => Promise<boolean>;
+    updateAvailability: (id: string) => Promise<void>;
+    deleteMenuItem: (id: string) => Promise<void>;
+    getAllMenuItems: () => Promise<void>;
 }
 
 export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
     myRestaurant: null,
     isFetching: true,
+    menuItemList: [],
     // get my restaurant controller
     getMyRestaurant: async () => {
         try {
@@ -181,5 +187,150 @@ export const useSellerStore = create<UseSellerStoreInterface>((set, get) => ({
             }
         }
         return false
-    }
+    },
+
+    // menu items controller
+
+    // get all menuItems
+    getAllMenuItems: async () => {
+        try {
+            set({ isFetching: true });
+            const token = useAuthStore.getState().token;
+            const restaurantId = get().myRestaurant?._id || useAuthStore.getState().user?.restaurantId;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+
+            if (!restaurantId) {
+                throw new Error("Restaurant not found");
+            }
+
+            const response = await axios.get(`${RESTAURANT_API_ENDPOINTS.GET_ALL_MENU_ITEMS}/${restaurantId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            set({ menuItemList: response.data?.items || [] });
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                console.log(error.response?.data)
+                showToast(error.response?.data?.message, "Failed to fetch menu items");
+            } else {
+                showToast((error as any)?.message, "Failed to fetch menu items");
+            }
+        } finally {
+            set({ isFetching: false });
+        }
+    },
+    // add menu item
+    addMenuItem: async (input: MenuItemInputType) => {
+        try {
+            const token = useAuthStore.getState().token;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+            const fileName = input.file.split('/').pop() || `menu-item-${Date.now()}.jpg`;
+            const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'jpg';
+            const mimeType = fileExtension === 'png' ? 'image/png' : 'image/jpeg';
+
+            const formData = new FormData();
+            formData.append('name', input.name);
+            formData.append('description', input.description);
+            formData.append('price', String(input.price));
+            formData.append('isAvailable', String(input.isAvailable));
+            formData.append('file', {
+                uri: input.file,
+                name: fileName,
+                type: mimeType,
+            } as any);
+            const response = await axios.post(`${RESTAURANT_API_ENDPOINTS.ADD_MENU_ITEM}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            if (response.status === 201) {
+                const nextItem = response.data?.menuItem as MenuItemsType | undefined;
+                if (nextItem) {
+                    set((state) => ({
+                        menuItemList: [nextItem, ...state.menuItemList],
+                    }));
+                }
+                showToast(response.data?.message, "Menu item added successfully");
+                return true
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Failed to add menu item");
+            } else {
+                showToast((error as any)?.message, "Failed to add menu item");
+            }
+        }
+        return false;
+    },
+
+    // update availability
+    updateAvailability: async (id) => {
+        try {
+            const token = useAuthStore.getState().token;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+
+            const response = await axios.get(`${RESTAURANT_API_ENDPOINTS.TOGGLE_MENU_ITEM_AVAILABILITY}/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const updatedItem = response.data?.item as MenuItemsType | undefined;
+            if (updatedItem) {
+                set((state) => ({
+                    menuItemList: state.menuItemList.map((menuItem) =>
+                        menuItem._id === id ? updatedItem : menuItem,
+                    ),
+                }));
+            }
+
+            showToast(response.data?.message, "Availability updated");
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Failed to update availability");
+            } else {
+                showToast((error as any)?.message, "Failed to update availability");
+            }
+        }
+    },
+    // delete menu item
+    deleteMenuItem: async (id) => {
+        try {
+            const token = useAuthStore.getState().token;
+
+            if (!token) {
+                throw new Error("Missing authentication token");
+            }
+
+            const response = await axios.delete(`${RESTAURANT_API_ENDPOINTS.DELETE_MENU_ITEM}/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            set((state) => ({
+                menuItemList: state.menuItemList.filter((menuItem) => menuItem._id !== id),
+            }));
+
+            showToast(response.data?.message, "Item deleted successfully");
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Failed to delete menu item");
+            } else {
+                showToast((error as any)?.message, "Failed to delete menu item");
+            }
+        }
+    },
 }));

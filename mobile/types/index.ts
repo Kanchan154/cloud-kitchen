@@ -61,3 +61,20 @@ export type RestaurantUpdateInputType = {
     formattedAddress: string;
     phone: number;
 }
+
+export type MenuItemInputType = {
+    name: string;
+    description: string;
+    price: number;
+    isAvailable: boolean;
+    file: string
+}
+
+export type MenuItemsType = {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    isAvailable: boolean;
+    image: string;
+}
