@@ -58,7 +58,6 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
             image: uploadResult.url,
             price
         })
-
         res.status(201).json({ message: "Item added successfully", menuItem });
     } catch (uploadError: any) {
         const upstreamMessage = uploadError?.response?.data?.message || uploadError?.response?.data?.error;
@@ -122,4 +121,3 @@ export const toggleMenuItemAvailability = TryCatch(async (req: AuthenticatedRequ
     await item.save();
     res.status(200).json({ message: `${item.name} is marked as ${item.isAvailable ? "available" : "not available"}`, item });
 })
-
