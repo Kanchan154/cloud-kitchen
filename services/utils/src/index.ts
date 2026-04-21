@@ -15,6 +15,20 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+// Increase server timeout for Cloudinary uploads
+app.use((req, res, next) => {
+    req.setTimeout(300000); // 5 minutes
+    res.setTimeout(300000); // 5 minutes
+    next();
+});
+
+// Increase server timeout for Cloudinary uploads
+app.use((req, res, next) => {
+    req.setTimeout(300000); // 5 minutes
+    res.setTimeout(300000); // 5 minutes
+    next();
+});
+
 
 cloudinary.v2.config({
     cloud_name: ENV.CLOUD_NAME,
