@@ -6,6 +6,7 @@ const router = express.Router();
 // upload file route
 router.post('/upload', async (req, res) => {
     try {
+        // getting buffer of the file
         const { buffer } = req.body;
         
         if (!buffer) {
@@ -42,7 +43,6 @@ router.post('/upload', async (req, res) => {
                 }
             }
         }
-
         throw lastError;
 
     } catch (error: any) {
