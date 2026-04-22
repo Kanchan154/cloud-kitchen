@@ -1,5 +1,6 @@
 import { RoleOption } from "@/types";
 
+// colors
 export const AUTH_COLORS = {
     background: "#07111f",
     primary: "#facc15",
@@ -16,6 +17,7 @@ export const AUTH_COLORS = {
     errorText: "#fee2e2",
 } as const;
 
+// role options
 export const ROLE_OPTIONS: RoleOption[] = [
     {
         id: "customer",
