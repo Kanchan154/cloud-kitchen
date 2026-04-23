@@ -3,6 +3,5 @@ node_modules/
 .vscode/
 .env
 dist/
-
 .expo
 data.json
