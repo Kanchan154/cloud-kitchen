@@ -6,7 +6,6 @@ import cors from 'cors'
 import uploadRoute from './routes/cloudinary.js';
 const app = express();
 
-
 if (!ENV.CLOUD_NAME || !ENV.CLOUD_API_KEY || !ENV.CLOUD_SECRET_KEY) {
     throw new Error("Missing Cloudinary credentials");
 }
@@ -29,7 +28,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 cloudinary.v2.config({
     cloud_name: ENV.CLOUD_NAME,
     api_key: ENV.CLOUD_API_KEY,
@@ -37,7 +35,6 @@ cloudinary.v2.config({
 })
 
 app.use("/api/cloud", uploadRoute);
-
 
 // Error route
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
