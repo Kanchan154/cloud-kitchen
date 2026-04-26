@@ -138,5 +138,16 @@ export const updateRestaurant = TryCatch(async (req: AuthenticatedRequest, res) 
 })
 
 export const getNearByRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
-    
+    // get the location of the user
+    const {latitude, longitude, radius = 5000, search = ""} = req.query;
+    if(!latitude || !longitude){
+        return res.status(400).json({message:"Latitude and Longitude are required"});
+    }
+
+    const query:any = {
+        isVerified: true
+    }
+    if(search && typeof search === "string"){
+        query.name = {$regex:search, $optiions: "i"};
+    }
 })
