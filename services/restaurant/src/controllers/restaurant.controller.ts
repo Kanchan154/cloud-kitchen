@@ -44,7 +44,7 @@ export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => 
         const { data: uploadResult } = await axios.post(`${ENV.UTILS_URI}/api/cloud/upload`, {
             buffer: fileBuffer.content,
         }, {
-            timeout: 30000,
+            timeout: 300000,
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
         });
@@ -137,3 +137,6 @@ export const updateRestaurant = TryCatch(async (req: AuthenticatedRequest, res) 
     res.status(200).json({ message: "Restaurant updated successfully", restaurant });
 })
 
+export const getNearByRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
+    
+})
