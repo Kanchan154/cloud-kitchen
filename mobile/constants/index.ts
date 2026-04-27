@@ -41,13 +41,15 @@ export const ROLE_OPTIONS: RoleOption[] = [
 
 export const BASE_API_URL = "https://lrcv0tlh-3000.inc1.devtunnels.ms/api";
 export const BASE_API_RESTAURANT_URL = "https://lrcv0tlh-3001.inc1.devtunnels.ms/api/restaurant";
-// backend api keys
+
+// backend auth api keys
 export const AUTH_API_ENDPOINTS = {
     LOGIN: `${BASE_API_URL}/auth/login`,
     ADD_ROLE: `${BASE_API_URL}/auth/add-role`,
     CHECK_AUTH: `${BASE_API_URL}/auth/check-auth`
 }
 
+// backend restaurant api kets
 export const RESTAURANT_API_ENDPOINTS = {
     ADD_RESTAURANT: `${BASE_API_RESTAURANT_URL}/add-restaurant`,
     FETCH_MY_RESTAURANT: `${BASE_API_RESTAURANT_URL}/get-my-restaurant`,
