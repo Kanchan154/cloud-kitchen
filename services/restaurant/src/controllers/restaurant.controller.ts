@@ -185,6 +185,7 @@ export const getNearByRestaurant = TryCatch(async (req: AuthenticatedRequest, re
 // fetch single restaurant
 export const fetchSingleRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
     const { id } = req.params;
+    // get the restaurant details by restaurant id
     const restaurant = await RestaurantModel.findById(id);
     if (!restaurant) {
         return res.status(404).json({ message: "Restaurant not found" });
