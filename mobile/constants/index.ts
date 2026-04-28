@@ -60,4 +60,7 @@ export const RESTAURANT_API_ENDPOINTS = {
     TOGGLE_MENU_ITEM_AVAILABILITY: `${BASE_API_RESTAURANT_URL}/menu-item/toggle-availability`,
     DELETE_MENU_ITEM: `${BASE_API_RESTAURANT_URL}/menu-item/delete`,
     GET_ALL_MENU_ITEMS: `${BASE_API_RESTAURANT_URL}/menu-item/get-all`,
+
+    // get all nearby restaurants
+    GET_ALL_NEARBY_RESTURANTS: `${BASE_API_RESTAURANT_URL}/get-all`
 }
