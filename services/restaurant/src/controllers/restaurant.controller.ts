@@ -5,7 +5,6 @@ import TryCatch from "../middleware/trycatch.js";
 import RestaurantModel from "../models/restraurant.model.js";
 import { ENV } from "../config/ENV.js";
 import jwt from "jsonwebtoken";
-import { stat } from "fs";
 
 // add restaurant
 export const addRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
@@ -137,17 +136,58 @@ export const updateRestaurant = TryCatch(async (req: AuthenticatedRequest, res) 
     res.status(200).json({ message: "Restaurant updated successfully", restaurant });
 })
 
+// get nearby restaurant
 export const getNearByRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
     // get the location of the user
-    const {latitude, longitude, radius = 5000, search = ""} = req.query;
-    if(!latitude || !longitude){
-        return res.status(400).json({message:"Latitude and Longitude are required"});
+    const { latitude, longitude, radius = 5000, search = "" } = req.query;
+    if (!latitude || !longitude) {
+        return res.status(400).json({ message: "Latitude and Longitude are required" });
     }
 
-    const query:any = {
+    const query: any = {
         isVerified: true
     }
-    if(search && typeof search === "string"){
-        query.name = {$regex:search, $optiions: "i"};
+    if (search && typeof search === "string") {
+        query.name = { $regex: search, $optiions: "i" };
     }
+    // get the list of restaurants
+    const restaurants = await RestaurantModel.aggregate([
+        {
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [Number(longitude), Number(latitude)]
+                },
+                distanceField: "distance",
+                maxDistance: Number(radius),
+                query,
+                spherical: true,
+            }
+        },
+        {
+            $sort: {
+                isOpen: -1,
+                distance: 1
+            }
+        },
+        {
+            $addFields: {
+                distanceKm: {
+                    $round: [{ $divide: ["$distance", 1000] }, 2]
+                }
+            }
+        }
+    ]);
+
+    res.status(200).json({ restaurants, count: restaurants.length });
+})
+
+// fetch single restaurant
+export const fetchSingleRestaurant = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const { id } = req.params;
+    const restaurant = await RestaurantModel.findById(id);
+    if (!restaurant) {
+        return res.status(404).json({ message: "Restaurant not found" });
+    }
+    res.status(200).json({ restaurant });
 })
