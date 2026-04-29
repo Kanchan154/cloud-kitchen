@@ -19,6 +19,7 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
     searchRestraunt: "",
     restaurants: [],
 
+    // set the city by entering the values in search box
     setCity: () => {
 
     },
@@ -32,7 +33,7 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
         if (!token) return
         if (!location || !location.latitude || !location.longitude) {
             Alert.alert("You need to give permission of you location to continue");
-            return
+            return;
         }
         try {
             const { data } = await axios.get(RESTAURANT_API_ENDPOINTS.GET_ALL_NEARBY_RESTURANTS, {
@@ -49,8 +50,7 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
                 restaurants: data.restaurants ?? []
             })
         } catch (error) {
-
+            console.log(error)
         }
-
     }
 }))
