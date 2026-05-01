@@ -57,6 +57,10 @@ const RestaurantSchema = new mongoose.Schema<IRestaurant>({
     isOpen: {
         type: Boolean,
         default: false,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
     }
 }, { timestamps: true });
 

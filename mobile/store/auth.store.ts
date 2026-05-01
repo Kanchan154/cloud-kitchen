@@ -186,24 +186,98 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
             let formattedAddress = "";
             let city = "";
 
+            const buildAddress = (parts: Array<string | null | undefined>) =>
+                parts.filter((part): part is string => typeof part === "string" && part.trim().length > 0).join(", ");
+
             try {
-                const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-                if (geocode && geocode.length > 0) {
-                    const place = geocode[0];
+                const reverse = await Location.reverseGeocodeAsync({ latitude, longitude });
+                const first = reverse?.[0];
+
+                if (first) {
                     const parts = [
-                        place.name,
-                        place.street,
-                        place.city,
-                        place.region,
-                        place.postalCode,
-                        place.country
+                        first.name,
+                        first.street,
+                        first.district,
+                        first.city || first.subregion,
+                        first.region,
+                        first.postalCode,
+                        first.country
                     ].filter(Boolean);
+
                     formattedAddress = parts.join(", ");
-                    city=place.city || place.district || "Your City"
+                    city = first.city || first.subregion || first.region || "Your City";
                 }
-            } catch {
-                formattedAddress = "";
-                city=""
+            } catch (expoGeocodeError) {
+                console.log("Expo reverse geocode failed:", expoGeocodeError);
+            }
+
+            // Fallback to Nominatim only if native reverse geocoder fails.
+            if (!formattedAddress) {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en&email=cloudkitchen.app@gmail.com`;
+                    const res = await fetch(url, {
+                        headers: {
+                            Accept: "application/json",
+                            "Accept-Language": "en",
+                            "User-Agent": "cloud-kitchen-mobile/1.0 (cloudkitchen.app@gmail.com)"
+                        }
+                    });
+
+                    const raw = await res.text();
+                    if (!res.ok) {
+                        throw new Error(`Reverse geocoding failed (${res.status})`);
+                    }
+
+                    let data: any;
+                    try {
+                        data = JSON.parse(raw);
+                    } catch {
+                        throw new Error(`Invalid JSON from geocoding service: ${raw.slice(0, 120)}`);
+                    }
+
+                    const address = data?.address || {};
+                    formattedAddress = data.display_name || "current location";
+                    city = address.city || address.village || address.town || "Your City";
+                } catch (error) {
+                    console.log("Nominatim reverse geocode failed:", error);
+                }
+            }
+
+            // Secondary fallback for devices where Nominatim is blocked (403).
+            if (!formattedAddress) {
+                try {
+                    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+                    const res = await fetch(url, {
+                        headers: {
+                            Accept: "application/json"
+                        }
+                    });
+
+                    const raw = await res.text();
+                    if (!res.ok) {
+                        throw new Error(`BigDataCloud reverse geocoding failed (${res.status})`);
+                    }
+
+                    let data: any;
+                    try {
+                        data = JSON.parse(raw);
+                    } catch {
+                        throw new Error(`Invalid JSON from BigDataCloud: ${raw.slice(0, 120)}`);
+                    }
+
+                    formattedAddress = buildAddress([
+                        data.locality,
+                        data.city,
+                        data.principalSubdivision,
+                        data.countryName
+                    ]) || "current location";
+
+                    city = data.city || data.locality || data.principalSubdivision || "Your City";
+                } catch (error) {
+                    console.log("BigDataCloud reverse geocode failed:", error);
+                    formattedAddress = "current location";
+                    city = "Your City";
+                }
             }
 
             set({
@@ -214,6 +288,7 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 } as LocationData,
                 city: city
             });
+            console.log(get().location)
 
             showToast("Location fetched successfully", "Location fetched successfully");
         } catch (error) {

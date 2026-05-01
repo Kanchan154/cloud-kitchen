@@ -73,9 +73,15 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
 export const getAllMenuItems = TryCatch(async (req: AuthenticatedRequest, res) => {
     // get id of restaurant
     const { id } = req.params;
+    const { fromCustomer } = req.query;
     if (!id) return res.status(404).json({ message: "Restaurant not found" });
 
     // getting the menu items
+    if (fromCustomer === "true") {
+        const items = await MenuItemModel.find({ restaurantId: id, isAvailable: true });
+        res.status(200).json({ items });
+    }
+
     const items = await MenuItemModel.find({ restaurantId: id });
     res.status(200).json({ items });
 })
@@ -121,3 +127,5 @@ export const toggleMenuItemAvailability = TryCatch(async (req: AuthenticatedRequ
     await item.save();
     res.status(200).json({ message: `${item.name} is marked as ${item.isAvailable ? "available" : "not available"}`, item });
 })
+
+// get add menu Items

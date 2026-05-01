@@ -34,7 +34,7 @@ const initialFormState = (location: ReturnType<typeof useAuthStore.getState>['lo
 });
 
 const AddRestaurantDialogBox = ({ visible }: Props) => {
-  const location = useAuthStore((state) => state.location);
+  const {location, getLocation} = useAuthStore();
   const [form, setForm] = useState(initialFormState(location));
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -352,12 +352,15 @@ const AddRestaurantDialogBox = ({ visible }: Props) => {
                         {location?.formattedAddress || 'No saved location found.'}
                       </Text>
                     </View>
+                    <Pressable onPress={() => getLocation()} >
+                      <Text>Refetch Location</Text>
+                    </Pressable>
                   </View>
 
                   <View className="flex-row flex-wrap gap-2">
                     <View className="px-3 py-2 border rounded-full" style={{ backgroundColor: AUTH_COLORS.chip, borderColor: AUTH_COLORS.chipBorder }}>
                       <Text className="text-xs font-semibold" style={{ color: AUTH_COLORS.textPrimary }}>
-                        Lat: {hasLocation ? location!.latitude.toFixed(6) : '--'}
+                        Lat: {hasLocation ? location?.latitude.toFixed(6) : '--'}
                       </Text>
                     </View>
                     <View className="px-3 py-2 border rounded-full" style={{ backgroundColor: AUTH_COLORS.chip, borderColor: AUTH_COLORS.chipBorder }}>

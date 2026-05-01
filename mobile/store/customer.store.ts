@@ -1,30 +1,22 @@
-import { create } from "zustand";
-import { useAuthStore } from "./auth.store";
-import { Alert } from "react-native";
-import axios from "axios";
 import { RESTAURANT_API_ENDPOINTS } from "@/constants";
 import { IRestaurant } from "@/types";
+import axios from "axios";
+import { create } from "zustand";
+import { useAuthStore } from "./auth.store";
 
 interface CUSTOMERSTORE {
     searchRestraunt: string;
     restaurants: IRestaurant[]
-    setSearchRestraunt: () => Promise<void>;
-    city: string;
-    setCity: () => void;
+    setSearchRestraunt: (searchRestraunt: string) => void;
     fetchRestaurant: () => Promise<void>;
 }
 
 export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
-    city: "",
     searchRestraunt: "",
     restaurants: [],
 
-    // set the city by entering the values in search box
-    setCity: () => {
-
-    },
-    setSearchRestraunt: async () => {
-
+    setSearchRestraunt: (searchRestraunt: string) => {
+        set({ searchRestraunt });
     },
     // fetch restaurants
     fetchRestaurant: async () => {
@@ -32,7 +24,6 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
         const token = useAuthStore.getState().token;
         if (!token) return
         if (!location || !location.latitude || !location.longitude) {
-            Alert.alert("You need to give permission of you location to continue");
             return;
         }
         try {
@@ -40,7 +31,7 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
                 params: {
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    search: get().city
+                    search: useAuthStore.getState().city
                 },
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -52,5 +43,5 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
         } catch (error) {
             console.log(error)
         }
-    }
+    },
 }))
