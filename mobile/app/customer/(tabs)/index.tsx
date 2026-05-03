@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { useCustomerStore } from '@/store/customer.store'
 import { IRestaurant } from '@/types'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native'
 
@@ -55,7 +56,7 @@ const Home = () => {
           />
         }
         ListEmptyComponent={isFetching ? LoadingSection : EmptySection}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 36 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshing={isFetching}
         onRefresh={handleRefresh}
@@ -65,6 +66,7 @@ const Home = () => {
 }
 
 const RestaurantCard = ({ restaurant }: { restaurant: IRestaurant }) => {
+  const router = useRouter();
   const coordinates = restaurant.autoLocation?.coordinates ?? [0, 0]
   const longitude = coordinates[0] ?? 0
   const latitude = coordinates[1] ?? 0
@@ -142,6 +144,10 @@ const RestaurantCard = ({ restaurant }: { restaurant: IRestaurant }) => {
           </View>
 
           <Pressable
+            onPress={() => router.push({
+              pathname: "/customer/restaurant/[restaurant]",
+              params: { restaurant: restaurant._id as string | number },
+            })}
             className="flex-row items-center px-3 py-2 border rounded-full"
             style={{ backgroundColor: AUTH_COLORS.background, borderColor: AUTH_COLORS.cardBorder }}
           >

@@ -1,10 +1,11 @@
-import { View, Text } from 'react-native'
-import React from 'react'
 import { AUTH_COLORS } from '@/constants'
+import React from 'react'
+import { View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Background = ({ children }: { children: React.ReactNode }) => {
     return (
-        <View
+        <SafeAreaView
             className="flex-1"
             style={{ backgroundColor: AUTH_COLORS.background }}
         >
@@ -33,7 +34,7 @@ const Background = ({ children }: { children: React.ReactNode }) => {
                 }}
             />
             {children}
-        </View>
+        </SafeAreaView>
     )
 }
 

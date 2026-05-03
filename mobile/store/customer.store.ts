@@ -31,7 +31,7 @@ export const useCustomerStore = create<CUSTOMERSTORE>((set, get) => ({
                 params: {
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    search: useAuthStore.getState().city
+                    // search: useAuthStore.getState().city
                 },
                 headers: {
                     Authorization: `Bearer ${token}`

@@ -150,6 +150,7 @@ export const getNearByRestaurant = TryCatch(async (req: AuthenticatedRequest, re
     if (search && typeof search === "string") {
         query.name = { $regex: search, $optiions: "i" };
     }
+
     // get the list of restaurants
     const restaurants = await RestaurantModel.aggregate([
         {

@@ -208,7 +208,6 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                     city = first.city || first.subregion || first.region || "Your City";
                 }
             } catch (expoGeocodeError) {
-                console.log("Expo reverse geocode failed:", expoGeocodeError);
             }
 
             // Fallback to Nominatim only if native reverse geocoder fails.
@@ -239,7 +238,6 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                     formattedAddress = data.display_name || "current location";
                     city = address.city || address.village || address.town || "Your City";
                 } catch (error) {
-                    console.log("Nominatim reverse geocode failed:", error);
                 }
             }
 
@@ -288,8 +286,6 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
                 } as LocationData,
                 city: city
             });
-            console.log(get().location)
-
             showToast("Location fetched successfully", "Location fetched successfully");
         } catch (error) {
             showToast("Failed to fetch location", "Failed to fetch location");

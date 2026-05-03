@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useEffect } from "react";
 
 export default function RootLayout() {
-  const {getLocation} = useAuthStore();
+  const { getLocation } = useAuthStore();
   useEffect(() => {
     getLocation();
   }, [])
@@ -17,6 +17,7 @@ export default function RootLayout() {
         <Stack.Screen name="customer/(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="seller/(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="rider/(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="customer/restaurant/[restaurant]" options={{ headerShown: false }} />
       </Stack>
     </ProtectedRoute>
   );
