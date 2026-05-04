@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+// auth types
 export type USER = {
     name: string;
     email: string;
@@ -22,8 +23,6 @@ export type LocationData = {
     longitude: number;
     formattedAddress: string;
 }
-
-
 
 // type for restaurant
 export type IRestaurant = {
@@ -62,6 +61,7 @@ export type RestaurantUpdateInputType = {
     phone: number;
 }
 
+// menu Items
 export type MenuItemInputType = {
     name: string;
     description: string;
@@ -77,4 +77,21 @@ export type MenuItemsType = {
     price: number;
     isAvailable: boolean;
     image: string;
+}
+
+// Cart 
+export type CartItemType = {
+    userId: string;
+    restaurantId: string | IRestaurant;
+    itemId: string | MenuItemsType;
+    quantity: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type CartInputType = {
+    userId: string;
+    restaurantId: string;
+    itemId: string;
+    quantity: number;
 }
