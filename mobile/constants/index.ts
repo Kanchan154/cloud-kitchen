@@ -62,5 +62,13 @@ export const RESTAURANT_API_ENDPOINTS = {
     GET_ALL_MENU_ITEMS: `${BASE_API_RESTAURANT_URL}/menu-item/get-all`,
 
     // get all nearby restaurants
-    GET_ALL_NEARBY_RESTURANTS: `${BASE_API_RESTAURANT_URL}/get-all`
+    GET_ALL_NEARBY_RESTURANTS: `${BASE_API_RESTAURANT_URL}/get-all`,
+
+
+
+    // cart apis
+    ADD_TO_CART: `${BASE_API_RESTAURANT_URL}/cart/add-to-cart`,
+    GET_CART_ITEMS: `${BASE_API_RESTAURANT_URL}/cart/get-cart-items`,
+    CLEAR_CART: `${BASE_API_RESTAURANT_URL}/cart/clear-cart`,
+    UPDATE_CART: `${BASE_API_RESTAURANT_URL}/cart/update-cart`,
 }

@@ -1,13 +1,14 @@
-import { View, Text, FlatList, Pressable, ActivityIndicator, Image, ToastAndroid, Animated } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router'
-import { MenuItemsType } from '@/types';
-import { useCustomerStore } from '@/store/customer.store';
-import { useAuthStore } from '@/store/auth.store';
-import axios, { AxiosError } from 'axios';
-import { AUTH_COLORS, RESTAURANT_API_ENDPOINTS } from '@/constants';
 import Background from '@/components/shared/Background';
+import { RESTAURANT_API_ENDPOINTS } from '@/constants';
+import { useAuthStore } from '@/store/auth.store';
+import { useCartStore } from '@/store/cart.store';
+import { useCustomerStore } from '@/store/customer.store';
+import { CartInputType, MenuItemsType } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import axios, { AxiosError } from 'axios';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Pressable, Text, ToastAndroid, View } from 'react-native';
 
 const RestaurantDetailPage = () => {
     const { restaurants } = useCustomerStore();
@@ -16,6 +17,7 @@ const RestaurantDetailPage = () => {
     const [isFetching, setisFetching] = useState(true);
     const Irestaurant = restaurants.find((r) => r._id === restaurant);
     const { token } = useAuthStore();
+    const { addToCart } = useCartStore();
 
     const getRestaurantMenu = async () => {
         try {
@@ -36,6 +38,13 @@ const RestaurantDetailPage = () => {
         }
         finally {
             setisFetching(false);
+        }
+    }
+
+    const handleAddToCart = (restaurantId: string, itemId: string) => {
+        try {
+            addToCart({ restaurantId, itemId })
+        } catch (error) {
         }
     }
 
@@ -67,7 +76,7 @@ const RestaurantDetailPage = () => {
                         </View>
                     )}
                     data={menuItems}
-                    renderItem={renderMenuItem}
+                    renderItem={({ item }) => renderMenuItem({ item, onClick: () => handleAddToCart(Irestaurant._id, item._id) })}
                     keyExtractor={(item) => item._id}
                     scrollEnabled={true}
                     contentContainerStyle={{ paddingVertical: 12 }}
@@ -80,61 +89,63 @@ const RestaurantDetailPage = () => {
 }
 
 export default RestaurantDetailPage;
-
-const renderMenuItem = ({ item }: { item: MenuItemsType }) => (
-    <Pressable className="mx-4 mb-4 overflow-hidden border border-gray-200 rounded-lg">
-        <View className="flex-row py-1">
-            {/* Image */}
-            <Image
-                source={{ uri: item.image }}
-                className="rounded-lg size-28"
-                defaultSource={require('@/assets/images/icon.png')}
-            />
-            {/* Details */}
-            <View className="justify-between flex-1 p-3">
-                <View className='flex-row items-start justify-between'>
-                    <View>
-                        <Text className="text-lg font-bold text-white">{item.name}</Text>
-                        <Text className="mt-1 text-sm text-gray-400" numberOfLines={2}>
-                            {item.description}
-                        </Text>
+const renderMenuItem = ({ item, onClick }: { item: MenuItemsType, onClick: () => void }) => {
+    return (
+        <Pressable className="mx-4 mb-4 overflow-hidden border border-gray-200 rounded-lg">
+            <View className="flex-row py-1">
+                {/* Image */}
+                <Image
+                    source={{ uri: item.image }}
+                    className="rounded-lg size-28"
+                    defaultSource={require('@/assets/images/icon.png')}
+                />
+                {/* Details */}
+                <View className="justify-between flex-1 p-3">
+                    <View className='flex-row items-start justify-between'>
+                        <View>
+                            <Text className="text-lg font-bold text-white">{item.name}</Text>
+                            <Text className="mt-1 text-sm text-gray-400" numberOfLines={2}>
+                                {item.description}
+                            </Text>
+                        </View>
+                        {
+                            item.isAvailable && (
+                                <Pressable
+                                    onPress={onClick}
+                                    className='px-3 py-2.5 bg-red-500 rounded-full flex items-center justify-center'
+                                    style={{
+                                        shadowColor: '#ef4444',
+                                        shadowOffset: { width: 0, height: 3 },
+                                        shadowOpacity: 0.4,
+                                        shadowRadius: 4,
+                                        elevation: 6,
+                                    }}
+                                >
+                                    <Ionicons name='cart-outline' size={20} color='white' />
+                                </Pressable>
+                            )
+                        }
                     </View>
-                    {
-                        item.isAvailable && (
-                            <Pressable
-                                className='px-3 py-2.5 bg-red-500 rounded-full flex items-center justify-center'
-                                style={{
-                                    shadowColor: '#ef4444',
-                                    shadowOffset: { width: 0, height: 3 },
-                                    shadowOpacity: 0.4,
-                                    shadowRadius: 4,
-                                    elevation: 6,
-                                }}
-                            >
-                                <Ionicons name='cart-outline' size={20} color='white' />
-                            </Pressable>
-                        )
-                    }
-                </View>
-                <View className="flex-row items-center justify-between">
-                    <Text className="text-lg font-bold text-red-500">₹{item.price}</Text>
-                    <View
-                        className={`px-3 py-1 rounded-full ${item.isAvailable
-                            ? 'bg-green-100'
-                            : 'bg-red-100'
-                            }`}
-                    >
-                        <Text
-                            className={`text-xs font-semibold ${item.isAvailable
-                                ? 'text-green-700'
-                                : 'text-red-700'
+                    <View className="flex-row items-center justify-between">
+                        <Text className="text-lg font-bold text-red-500">₹{item.price}</Text>
+                        <View
+                            className={`px-3 py-1 rounded-full ${item.isAvailable
+                                ? 'bg-green-100'
+                                : 'bg-red-100'
                                 }`}
                         >
-                            {item.isAvailable ? 'Available' : 'Out of Stock'}
-                        </Text>
+                            <Text
+                                className={`text-xs font-semibold ${item.isAvailable
+                                    ? 'text-green-700'
+                                    : 'text-red-700'
+                                    }`}
+                            >
+                                {item.isAvailable ? 'Available' : 'Out of Stock'}
+                            </Text>
+                        </View>
                     </View>
                 </View>
             </View>
-        </View>
-    </Pressable>
-);
+        </Pressable>
+    )
+};

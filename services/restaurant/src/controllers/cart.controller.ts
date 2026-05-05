@@ -43,9 +43,8 @@ export const fetchCart = TryCatch(async (req: AuthenticatedRequest, res) => {
 
     for (const cartItem of cartItems) {
         const item: any = cartItem.itemId;
-        subTotal += item.quantity * item.price;
+        subTotal += cartItem.quantity * item.price;
         cartLength += cartItem.quantity;
-
     }
     return res.status(200).json({ message: "Cart fetched successfully", cart: cartItems, subTotal, cartLength });
 })
@@ -59,6 +58,6 @@ export const clearCart = TryCatch(async (req: AuthenticatedRequest, res) => {
     return res.status(200).json({ message: "Cart cleared successfully" });
 })
 
-export const updateCart = TryCatch(async(req: AuthenticatedRequest, res) => {
-    
+export const updateCart = TryCatch(async (req: AuthenticatedRequest, res) => {
+
 })

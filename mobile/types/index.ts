@@ -90,8 +90,6 @@ export type CartItemType = {
 }
 
 export type CartInputType = {
-    userId: string;
     restaurantId: string;
     itemId: string;
-    quantity: number;
 }
