@@ -89,6 +89,7 @@ export type CartItemType = {
     updatedAt: Date;
 }
 
+// cart input type
 export type CartInputType = {
     restaurantId: string;
     itemId: string;
