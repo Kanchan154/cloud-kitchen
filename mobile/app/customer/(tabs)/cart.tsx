@@ -1,13 +1,13 @@
 import Background from '@/components/shared/Background'
-import { useCartStore } from '@/store/cart.store'
 import { AUTH_COLORS } from '@/constants'
+import { useCartStore } from '@/store/cart.store'
 import { CartItemType, MenuItemsType } from '@/types'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Pressable, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from 'react-native'
 
 const Cart = () => {
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const { fetchCart, cartLenght, cartList, subTotal } = useCartStore();
 
   const handleFetchCart = async () => {
@@ -19,10 +19,6 @@ const Cart = () => {
       setIsFetching(false);
     }
   }
-
-  useEffect(() => {
-    handleFetchCart();
-  }, [])
 
   const handleRefresh = async () => {
     setIsFetching(true);
@@ -59,6 +55,7 @@ const CartItemCard = ({ item }: CartItemCardProps) => {
   const menuItem = typeof item.itemId === 'string' ? null : item.itemId as MenuItemsType;
   const restaurant = typeof item.restaurantId === 'string' ? null : item.restaurantId;
 
+  const { increamentItem, decreamentItem } = useCartStore();
   if (!menuItem) return null;
 
   return (
@@ -99,13 +96,13 @@ const CartItemCard = ({ item }: CartItemCardProps) => {
               borderColor: AUTH_COLORS.cardBorder,
             }}
           >
-            <Pressable className="p-1">
+            <Pressable className="p-1" onPress={() => decreamentItem(item.itemId._id)}>
               <MaterialCommunityIcons name="minus" size={14} color={AUTH_COLORS.textPrimary} />
             </Pressable>
             <Text className="w-6 text-xs font-semibold text-center" style={{ color: AUTH_COLORS.textPrimary }}>
               {item.quantity}
             </Text>
-            <Pressable className="p-1">
+            <Pressable className="p-1" onPress={() => increamentItem(item.itemId._id)}>
               <MaterialCommunityIcons name="plus" size={14} color={AUTH_COLORS.textPrimary} />
             </Pressable>
           </View>
@@ -182,6 +179,36 @@ const FooterCart = ({ subTotal }: FooterCartProps) => {
   const tax = safeSubTotal * 0.05
   const total = safeSubTotal + deliveryFee + tax
 
+  const { clearCart } = useCartStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const performClearCart = async () => {
+    setIsLoading(true);
+    try {
+      await clearCart();
+    } catch (error) {
+      console.error('clearCart error:', error);
+      Alert.alert('Error', 'Failed to clear cart. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearCart = () => {
+    Alert.alert('Clear Cart', 'Are you sure you want to clear your cart?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Clear',
+        style: 'destructive',
+        onPress: () => {
+          void performClearCart();
+        },
+      },
+    ]);
+  };
   return (
     <View className="mt-6">
       {/* Pricing Summary */}
@@ -255,11 +282,17 @@ const FooterCart = ({ subTotal }: FooterCartProps) => {
             backgroundColor: AUTH_COLORS.background,
             borderColor: AUTH_COLORS.cardBorder,
           }}
+          onPress={handleClearCart}
+          disabled={isLoading}
         >
-          <MaterialCommunityIcons name="trash-can-outline" size={18} color={AUTH_COLORS.textPrimary} />
-          <Text className="ml-2 text-base font-bold" style={{ color: AUTH_COLORS.textPrimary }}>
-            Clear Cart
-          </Text>
+          {isLoading ? <ActivityIndicator size="small" color={AUTH_COLORS.primary} /> :
+            <>
+              <MaterialCommunityIcons name="trash-can-outline" size={18} color={AUTH_COLORS.textPrimary} />
+              <Text className="ml-2 text-base font-bold" style={{ color: AUTH_COLORS.textPrimary }}>
+                Clear Cart
+              </Text>
+            </>
+          }
         </Pressable>
       </View>
     </View>

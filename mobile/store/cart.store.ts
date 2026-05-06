@@ -18,6 +18,9 @@ interface CARTSTORE {
     cartLenght: number
     addToCart: (input: CartInputType) => Promise<void>;
     fetchCart: () => Promise<void>;
+    increamentItem: (id: string) => Promise<void>;
+    decreamentItem: (id: string) => Promise<void>;
+    clearCart: () => Promise<void>;
 }
 export const useCartStore = create<CARTSTORE>((set, get) => ({
     cartList: [],
@@ -63,6 +66,67 @@ export const useCartStore = create<CARTSTORE>((set, get) => ({
             console.log(error);
         }
     },
-    
+
+    // incrementItem functionality
+    increamentItem: async (id: string) => {
+        try {
+            const token = useAuthStore.getState().token;
+            if (!token) return
+            await axios.put(`${RESTAURANT_API_ENDPOINTS.INCREMENT_ITEM}`, {
+                itemId: id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }).then((res) => {
+                showToast(res.data.message, "Item added to cart");
+                get().fetchCart();
+            }).catch((error: any) => { throw new Error(error.response.data.message) })
+        } catch (error: any) {
+            if (error instanceof AxiosError) showToast(error.response?.data?.message, "Failed to add to cart");
+            else showToast(error, "Failed to add to cart");
+        }
+    },
+
+    // decrementItem functionality
+    decreamentItem: async (id: string) => {
+        try {
+            const token = useAuthStore.getState().token;
+            if (!token) return
+            await axios.put(`${RESTAURANT_API_ENDPOINTS.DECREMENT_ITEM}`, {
+                itemId: id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }).then((res) => {
+                showToast(res.data.message, "Item Updated to cart");
+                get().fetchCart();
+            }).catch((error: any) => { throw new Error(error.response.data.message) })
+        } catch (error: any) {
+            if (error instanceof AxiosError) showToast(error.response?.data?.message, "Failed to add to cart");
+            else showToast(error, "Failed to update to cart");
+        }
+    },
+
     // clear cart functionlity
+    clearCart: async () => {
+        try {
+            const token = useAuthStore.getState().token;
+            if (!token) return;
+
+            await axios.delete(`${RESTAURANT_API_ENDPOINTS.CLEAR_CART}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }).then((res) => {
+                showToast(res.data.message, "Cart cleared");
+                get().fetchCart();
+            })
+        } catch (error: any) {
+            if (error instanceof AxiosError) showToast(error.response?.data?.message, "Failed to clear cart");
+            else showToast(error, "Failed to clear cart");
+        }
+
+    }
 }));

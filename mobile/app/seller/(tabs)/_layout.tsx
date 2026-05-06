@@ -11,6 +11,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  useAnimatedProps,
 } from 'react-native-reanimated';
 
 type TabIconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -21,6 +22,7 @@ type SellerTabButtonProps = BottomTabBarButtonProps & {
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedIcon = Animated.createAnimatedComponent(MaterialCommunityIcons);
 
 const SellerTabButton = ({
   accessibilityState,
@@ -91,7 +93,9 @@ const SellerTabButton = ({
     transform: [{ scale: interpolate(progress.value, [0, 1], [0.7, 1.1]) }],
   }));
 
-  const iconColor = focused ? AUTH_COLORS.primary : AUTH_COLORS.textSubtle;
+  const iconAnimatedProps = useAnimatedProps(() => ({
+    color: interpolateColor(progress.value, [0, 1], [AUTH_COLORS.textSubtle, AUTH_COLORS.primary]),
+  }));
 
   return (
     <AnimatedPressable
@@ -117,7 +121,11 @@ const SellerTabButton = ({
         style={[indicatorStyle, { backgroundColor: AUTH_COLORS.primary }]}
       />
       <Animated.View style={iconWrapStyle}>
-        <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
+        <AnimatedIcon
+          name={icon}
+          size={20}
+          animatedProps={iconAnimatedProps as any}
+        />
       </Animated.View>
       <Animated.Text className="mt-1 text-[11px] font-extrabold tracking-wide uppercase" style={labelStyle}>
         {label}

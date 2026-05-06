@@ -39,7 +39,7 @@ const menu = () => {
         renderItem={({ item }) => <MenuItemCard item={item} />}
         ListHeaderComponent={() => HeaderSection({ setIsVisible })}
         ListEmptyComponent={isFetching ? LoadingSection : EmptySection}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 56, paddingBottom: 36 }}
+        contentContainerStyle={{ paddingHorizontal: 24,  paddingBottom: 36 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

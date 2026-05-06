@@ -287,7 +287,7 @@ const ProfilePage = () => {
                             Address
                         </Text>
                         <Text
-                            className="text-xs"
+                            className="w-64 text-xs text-right"
                             style={{ color: AUTH_COLORS.textSubtle }}
                         >
                             {location?.formattedAddress || "Not set"}

@@ -61,3 +61,35 @@ export const clearCart = TryCatch(async (req: AuthenticatedRequest, res) => {
 export const updateCart = TryCatch(async (req: AuthenticatedRequest, res) => {
 
 })
+
+// increment item
+export const incrementItem = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const id = req.user?._id;
+    if (!id) {
+        return res.status(403).json({ message: "Unauthorized - User not found" });
+    }
+    const { itemId } = req.body;
+    if (!itemId) return res.status(400).json({ message: "Item id is required" })
+
+    await CartModel.findOneAndUpdate(
+        { userId: id, itemId },
+        { $inc: { quantity: 1 } },
+        { new: true }
+    )
+    return res.status(200).json({ message: "Item quantity updated successfully" });
+})
+
+// decrement item
+export const decrementItem = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const id = req.user?._id;
+    if (!id) {
+        return res.status(403).json({ message: "Unauthorized - User not found" });
+    }
+    const { itemId } = req.body;
+    await CartModel.findOneAndUpdate(
+        { userId: id, itemId },
+        { $inc: { quantity: -1 } },
+        { new: true }
+    );
+    return res.status(200).json({ message: "Item quantity updated successfully" });
+})

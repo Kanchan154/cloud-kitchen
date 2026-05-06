@@ -39,7 +39,6 @@ const MyRestraunt = ({ restaurant }: Props) => {
             <UpdateRestaurantDialogBox visible={isVisible} onClose={() => setisVisible(false)} />
             <ScrollView
                 className="flex-1"
-                contentContainerStyle={{ paddingVertical: 20 }}
                 showsVerticalScrollIndicator={false}
             >
                 <View

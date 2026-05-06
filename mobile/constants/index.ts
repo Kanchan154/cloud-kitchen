@@ -71,4 +71,6 @@ export const RESTAURANT_API_ENDPOINTS = {
     GET_CART_ITEMS: `${BASE_API_RESTAURANT_URL}/cart/get-cart-items`,
     CLEAR_CART: `${BASE_API_RESTAURANT_URL}/cart/clear-cart`,
     UPDATE_CART: `${BASE_API_RESTAURANT_URL}/cart/update-cart`,
+    INCREMENT_ITEM: `${BASE_API_RESTAURANT_URL}/cart/increase-quantity`,
+    DECREMENT_ITEM: `${BASE_API_RESTAURANT_URL}/cart/decrease-quantity`,
 }

@@ -1,4 +1,5 @@
 import { AUTH_COLORS } from '@/constants';
+import { useCartStore } from '@/store/cart.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
@@ -10,29 +11,35 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  useAnimatedProps,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type TabIconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
-type SellerTabButtonProps = BottomTabBarButtonProps & {
+type CustomerButtonProps = BottomTabBarButtonProps & {
   label: string;
   icon: TabIconName;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedIcon = Animated.createAnimatedComponent(MaterialCommunityIcons);
 
-const SellerTabButton = ({
+const CustomerButton = ({
   accessibilityState,
   onPress,
   onLongPress,
   label,
   icon,
-}: SellerTabButtonProps) => {
+}: CustomerButtonProps) => {
   const focused = Boolean(accessibilityState?.selected);
   const progress = useSharedValue(focused ? 1 : 0);
   const pressProgress = useSharedValue(0);
+  const { cartLenght, fetchCart } = useCartStore();
 
+  useEffect(() => {
+    cartLenght === 0 && fetchCart();
+  }, [cartLenght])
   useEffect(() => {
     progress.value = withSpring(focused ? 1 : 0, {
       damping: 16,
@@ -91,7 +98,9 @@ const SellerTabButton = ({
     transform: [{ scale: interpolate(progress.value, [0, 1], [0.7, 1.1]) }],
   }));
 
-  const iconColor = focused ? AUTH_COLORS.primary : AUTH_COLORS.textSubtle;
+  const iconAnimatedProps = useAnimatedProps(() => ({
+    color: interpolateColor(progress.value, [0, 1], [AUTH_COLORS.textSubtle, AUTH_COLORS.primary]),
+  }));
 
   return (
     <AnimatedPressable
@@ -117,7 +126,25 @@ const SellerTabButton = ({
         style={[indicatorStyle, { backgroundColor: AUTH_COLORS.primary }]}
       />
       <Animated.View style={iconWrapStyle}>
-        <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
+        {label === "Cart" && cartLenght > 0 && (
+          <View
+            className="absolute items-center justify-center w-4 h-4 rounded-full -right-2 -top-1"
+            style={{
+              backgroundColor: AUTH_COLORS.primary,
+              borderColor: 'rgba(250,204,21,0.6)',
+              borderWidth: 1,
+            }}
+          >
+            <Text className="text-[10px] font-extrabold" style={{ color: '#07111F' }}>
+              {cartLenght}
+            </Text>
+          </View>
+        )}
+        <AnimatedIcon
+          name={icon}
+          size={20}
+          animatedProps={iconAnimatedProps as any}
+        />
       </Animated.View>
       <Animated.Text className="mt-1 text-[11px] font-extrabold tracking-wide uppercase" style={labelStyle}>
         {label}
@@ -182,7 +209,7 @@ const TabLayoutSeller = () => {
         name="index"
         options={{
           tabBarButton: (props) => (
-            <SellerTabButton
+            <CustomerButton
               {...props}
               label="Home"
               icon="storefront-outline"
@@ -194,10 +221,10 @@ const TabLayoutSeller = () => {
         name="cart"
         options={{
           tabBarButton: (props) => (
-            <SellerTabButton
+            <CustomerButton
               {...props}
               label="Cart"
-              icon="cart-arrow-down"
+              icon="cart-arrow-right"
             />
           ),
         }}
@@ -206,7 +233,7 @@ const TabLayoutSeller = () => {
         name="profile"
         options={{
           tabBarButton: (props) => (
-            <SellerTabButton
+            <CustomerButton
               {...props}
               label="Profile"
               icon="account-circle-outline"
