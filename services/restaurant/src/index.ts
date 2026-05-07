@@ -5,13 +5,14 @@ import connectDB from './config/db.js';
 import restaurantRoute from './routes/restaurant.route.js'
 import menuItemRoute from './routes/menuItem.route.js';
 import cartRoute from "./routes/cart.route.js";
-
+import addressRoute from "./routes/address.route.js";
 const app = express();
 
 app.use(express.json());
 app.use("/api/restaurant", restaurantRoute);
 app.use('/api/restaurant/menu-item', menuItemRoute);
 app.use('/api/restaurant/cart', cartRoute);
+app.use('/api/restaurant/address', addressRoute);
 
 // Error route
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

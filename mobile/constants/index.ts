@@ -54,8 +54,8 @@ export const RESTAURANT_API_ENDPOINTS = {
     ADD_RESTAURANT: `${BASE_API_RESTAURANT_URL}/add-restaurant`,
     FETCH_MY_RESTAURANT: `${BASE_API_RESTAURANT_URL}/get-my-restaurant`,
     UPDATE_RESTAURANT_STATUS: `${BASE_API_RESTAURANT_URL}/update-status`,
-    UPDATE_RESTAURANT:`${BASE_API_RESTAURANT_URL}/update-restaurant`,
-    
+    UPDATE_RESTAURANT: `${BASE_API_RESTAURANT_URL}/update-restaurant`,
+
     ADD_MENU_ITEM: `${BASE_API_RESTAURANT_URL}/menu-item/add-new`,
     TOGGLE_MENU_ITEM_AVAILABILITY: `${BASE_API_RESTAURANT_URL}/menu-item/toggle-availability`,
     DELETE_MENU_ITEM: `${BASE_API_RESTAURANT_URL}/menu-item/delete`,
@@ -64,8 +64,6 @@ export const RESTAURANT_API_ENDPOINTS = {
     // get all nearby restaurants
     GET_ALL_NEARBY_RESTURANTS: `${BASE_API_RESTAURANT_URL}/get-all`,
 
-
-
     // cart apis
     ADD_TO_CART: `${BASE_API_RESTAURANT_URL}/cart/add-to-cart`,
     GET_CART_ITEMS: `${BASE_API_RESTAURANT_URL}/cart/get-cart-items`,
@@ -73,4 +71,9 @@ export const RESTAURANT_API_ENDPOINTS = {
     UPDATE_CART: `${BASE_API_RESTAURANT_URL}/cart/update-cart`,
     INCREMENT_ITEM: `${BASE_API_RESTAURANT_URL}/cart/increase-quantity`,
     DECREMENT_ITEM: `${BASE_API_RESTAURANT_URL}/cart/decrease-quantity`,
+
+    // address apis
+    ADD_ADDRESS: `${BASE_API_RESTAURANT_URL}/address/add-address`,
+    GET_ALL_ADDRESSES: `${BASE_API_RESTAURANT_URL}/address/get-all`,
+    DELETE_ADDRESS: `${BASE_API_RESTAURANT_URL}/address/delete-address`
 }

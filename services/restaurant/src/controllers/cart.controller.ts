@@ -26,7 +26,7 @@ export const addToCart = TryCatch(async (req: AuthenticatedRequest, res) => {
             $inc: { quantity: 1 },
             $setOnInsert: { userId, restaurantId, itemId }
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     return res.status(200).json({ message: "Item added to cart successfully", cart: cartItem });
 })
@@ -74,7 +74,7 @@ export const incrementItem = TryCatch(async (req: AuthenticatedRequest, res) => 
     await CartModel.findOneAndUpdate(
         { userId: id, itemId },
         { $inc: { quantity: 1 } },
-        { new: true }
+        { returnDocument: 'after' }
     )
     return res.status(200).json({ message: "Item quantity updated successfully" });
 })
@@ -86,10 +86,19 @@ export const decrementItem = TryCatch(async (req: AuthenticatedRequest, res) => 
         return res.status(403).json({ message: "Unauthorized - User not found" });
     }
     const { itemId } = req.body;
+    if (!itemId) return res.status(400).json({ message: "Item id is required" })
+
+    // if the item quantity is 1, delete the item
+    const cartItem = await CartModel.findOne({ userId: id, itemId });
+    if (!cartItem) return res.status(404).json({ message: "Item not found in cart" });
+    if (cartItem.quantity === 1) {
+        await CartModel.findByIdAndDelete(cartItem._id);
+        return res.status(200).json({ message: "Item removed from cart successfully" });
+    }
     await CartModel.findOneAndUpdate(
         { userId: id, itemId },
         { $inc: { quantity: -1 } },
-        { new: true }
+        { returnDocument: 'after' }
     );
     return res.status(200).json({ message: "Item quantity updated successfully" });
 })

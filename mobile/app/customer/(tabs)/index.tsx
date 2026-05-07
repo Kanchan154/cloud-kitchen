@@ -143,7 +143,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: IRestaurant }) => {
             </Text>
           </View>
 
-          <Pressable
+          {restaurant.isVerified && restaurant.isOpen && (<Pressable
             onPress={() => router.push({
               pathname: "/customer/restaurant/[restaurant]",
               params: { restaurant: restaurant._id as string | number },
@@ -155,7 +155,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: IRestaurant }) => {
               View menu
             </Text>
             <MaterialCommunityIcons name="chevron-right" size={16} color={AUTH_COLORS.textPrimary} />
-          </Pressable>
+          </Pressable>)}
         </View>
       </View>
     </Pressable>

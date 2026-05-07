@@ -82,7 +82,7 @@ export type MenuItemsType = {
 // Cart 
 export type CartItemType = {
     userId: string;
-    restaurantId: string | IRestaurant;
+    restaurantId: IRestaurant | string | null;
     itemId: MenuItemsType;
     quantity: number;
     createdAt: Date;

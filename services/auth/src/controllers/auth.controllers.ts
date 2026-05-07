@@ -57,7 +57,7 @@ export const addUserRole = TryCatch(async (req: AuthenticatedRequest, res) => {
         return;
     }
     // update the user role
-    const updatedUser = await User.findByIdAndUpdate(req.user._id, { role: role.role }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, { role: role.role }, { returnDocument: 'after' });
     if (!updatedUser) {
         res.status(404).json({ message: "User not found" });
         return;

@@ -110,7 +110,7 @@ export const updateRestaurantStatus = TryCatch(async (req: AuthenticatedRequest,
     const restaurant = await RestaurantModel.findOneAndUpdate(
         { ownerId: req.user._id },
         { $set: { isOpen: status } },
-        { new: true }
+        { returnDocument: 'after' }
     )
 
     if (!restaurant) {
@@ -128,7 +128,7 @@ export const updateRestaurant = TryCatch(async (req: AuthenticatedRequest, res) 
     const restaurant = await RestaurantModel.findOneAndUpdate(
         { ownerId: req.user._id },
         { $set: data },
-        { new: true }
+        { returnDocument: 'after' }
     )
     if (!restaurant) {
         return res.status(404).json({ message: "Restaurant not found" });

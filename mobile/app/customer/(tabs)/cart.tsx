@@ -1,7 +1,7 @@
 import Background from '@/components/shared/Background'
 import { AUTH_COLORS } from '@/constants'
 import { useCartStore } from '@/store/cart.store'
-import { CartItemType, MenuItemsType } from '@/types'
+import { CartItemType, IRestaurant, MenuItemsType } from '@/types'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from 'react-native'
@@ -9,6 +9,11 @@ import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from
 const Cart = () => {
   const [isFetching, setIsFetching] = useState(false);
   const { fetchCart, cartLenght, cartList, subTotal } = useCartStore();
+  const firstCartItem = cartList[0];
+  const restaurant =
+    firstCartItem && typeof firstCartItem.restaurantId !== 'string'
+      ? firstCartItem.restaurantId
+      : null;
 
   const handleFetchCart = async () => {
     try {
@@ -33,10 +38,11 @@ const Cart = () => {
         renderItem={({ item }) => <CartItemCard item={item} />}
         ListHeaderComponent={
           <HeaderCart
+            Restaurant={restaurant}
             cartLength={cartLenght}
           />
         }
-        ListFooterComponent={cartList.length > 0 ? <FooterCart subTotal={subTotal} /> : null}
+        ListFooterComponent={cartList.length > 0 ? <FooterCart subTotal={subTotal} restaurant={restaurant} /> : null}
         ListEmptyComponent={isFetching ? LoadingSection : EmptySection}
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -53,7 +59,6 @@ interface CartItemCardProps {
 
 const CartItemCard = ({ item }: CartItemCardProps) => {
   const menuItem = typeof item.itemId === 'string' ? null : item.itemId as MenuItemsType;
-  const restaurant = typeof item.restaurantId === 'string' ? null : item.restaurantId;
 
   const { increamentItem, decreamentItem } = useCartStore();
   if (!menuItem) return null;
@@ -75,13 +80,19 @@ const CartItemCard = ({ item }: CartItemCardProps) => {
 
       {/* Item Details */}
       <View className="justify-between flex-1 p-3">
-        <View>
-          <Text className="text-sm font-bold" style={{ color: AUTH_COLORS.textPrimary }} numberOfLines={1}>
-            {menuItem.name}
-          </Text>
-          <Text className="mt-1 text-xs" style={{ color: AUTH_COLORS.textSubtle }} numberOfLines={2}>
-            {menuItem.description}
-          </Text>
+        <View className='flex-row justify-between flex-1'>
+          <View>
+            <Text className="text-sm font-bold" style={{ color: AUTH_COLORS.textPrimary }} numberOfLines={1}>
+              {menuItem.name}
+            </Text>
+            <Text className="mt-1 text-xs" style={{ color: AUTH_COLORS.textSubtle }} numberOfLines={2}>
+              {menuItem.description}
+            </Text>
+          </View>
+          <View className='pr-4'>
+            <Text className="text-base font-bold" style={{ color: AUTH_COLORS.primary }}>
+              ₹{item.quantity * item.itemId.price}</Text>
+          </View>
         </View>
 
         <View className="flex-row items-center justify-between">
@@ -114,9 +125,10 @@ const CartItemCard = ({ item }: CartItemCardProps) => {
 
 type HeaderCartProps = {
   cartLength: number;
+  Restaurant: IRestaurant | null
 }
 
-const HeaderCart = ({ cartLength }: HeaderCartProps) => {
+const HeaderCart = ({ cartLength, Restaurant }: HeaderCartProps) => {
   return (
     <View className="mb-5">
       <View
@@ -132,11 +144,11 @@ const HeaderCart = ({ cartLength }: HeaderCartProps) => {
               Your cart
             </Text>
             <Text className="mt-2 text-2xl font-extrabold" style={{ color: AUTH_COLORS.textPrimary }}>
-              {cartLength > 0 ? 'Review your order' : 'Your cart is empty'}
+              {cartLength > 0 ? `Review your order from ${Restaurant?.name}` : 'Your cart is empty'}
             </Text>
             {cartLength > 0 && (
               <Text className="mt-2 text-xs leading-5" style={{ color: AUTH_COLORS.textSubtle }}>
-                Verify items, quantities, and proceed to checkout.
+                {Restaurant?.autoLocation.formattedAddress}
               </Text>
             )}
           </View>
@@ -171,17 +183,20 @@ const HeaderCart = ({ cartLength }: HeaderCartProps) => {
 
 type FooterCartProps = {
   subTotal: number;
+  restaurant: IRestaurant | null
 }
 
-const FooterCart = ({ subTotal }: FooterCartProps) => {
+const FooterCart = ({ subTotal, restaurant }: FooterCartProps) => {
   const safeSubTotal = Number(subTotal ?? 0)
-  const deliveryFee = 50
+  const deliveryFee = subTotal >= 500 ? 0 : 50
   const tax = safeSubTotal * 0.05
   const total = safeSubTotal + deliveryFee + tax
 
   const { clearCart } = useCartStore();
   const [isLoading, setIsLoading] = useState(false);
+  const handleChackOut = () => {
 
+  }
   const performClearCart = async () => {
     setIsLoading(true);
     try {
@@ -233,7 +248,7 @@ const FooterCart = ({ subTotal }: FooterCartProps) => {
               Delivery Fee
             </Text>
             <Text style={{ color: AUTH_COLORS.textPrimary }} className="text-sm font-semibold">
-              ₹{deliveryFee.toFixed(2)}
+              {`${deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}`}
             </Text>
           </View>
           <View className="flex-row justify-between">
@@ -259,12 +274,18 @@ const FooterCart = ({ subTotal }: FooterCartProps) => {
             ₹{total.toFixed(2)}
           </Text>
         </View>
+        {
+          deliveryFee !== 0 &&
+          <Text style={{ color: AUTH_COLORS.primary }} className="text-sm font-semibold">
+            {`Add item worth ₹${500 - subTotal} to get free delivery`}</Text>
+        }
       </View>
 
       {/* Action Buttons */}
       <View className="gap-3">
         <Pressable
-          className="flex-row items-center justify-center py-3 border rounded-[16px]"
+          disabled={!restaurant?.isOpen}
+          className="flex-row items-center justify-center py-3 border rounded-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             backgroundColor: AUTH_COLORS.primary,
             borderColor: AUTH_COLORS.primary,
@@ -272,7 +293,7 @@ const FooterCart = ({ subTotal }: FooterCartProps) => {
         >
           <MaterialCommunityIcons name="card-multiple" size={18} color="white" />
           <Text className="ml-2 text-base font-bold text-white">
-            Proceed to Checkout
+            {!restaurant?.isOpen ? "Restaurant is closed" : "Proceed to Checkout"}
           </Text>
         </Pressable>
 
