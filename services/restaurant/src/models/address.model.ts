@@ -3,9 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IAddress extends Document {
     userId: string;
     mobile: number;
-
     formattedAddress: string;
-
     location: {
         type: "Point";
         coordinates: [number, number];
