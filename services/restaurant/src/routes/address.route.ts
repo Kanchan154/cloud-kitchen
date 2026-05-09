@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post("/add-address", isAuth, addAddress);
 router.get('/get-all', isAuth, getAllAddresses);
-router.delete('/delete-address/:id', isAuth, deleteAddress);
+router.delete('/delete-address/:addressId', isAuth, deleteAddress);
 
 export default router;

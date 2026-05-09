@@ -3,6 +3,7 @@ import { AUTH_COLORS } from '@/constants'
 import { useCartStore } from '@/store/cart.store'
 import { CartItemType, IRestaurant, MenuItemsType } from '@/types'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, View } from 'react-native'
 
@@ -191,11 +192,19 @@ const FooterCart = ({ subTotal, restaurant }: FooterCartProps) => {
   const deliveryFee = subTotal >= 500 ? 0 : 50
   const tax = safeSubTotal * 0.05
   const total = safeSubTotal + deliveryFee + tax
-
+  const router = useRouter();
   const { clearCart } = useCartStore();
   const [isLoading, setIsLoading] = useState(false);
   const handleChackOut = () => {
-
+    if (restaurant) {
+      router.push({
+        pathname: '/customer/checkout',
+        params: {
+          restaurant: JSON.stringify(restaurant),
+          total: total
+        }
+      });
+    }
   }
   const performClearCart = async () => {
     setIsLoading(true);
@@ -284,6 +293,7 @@ const FooterCart = ({ subTotal, restaurant }: FooterCartProps) => {
       {/* Action Buttons */}
       <View className="gap-3">
         <Pressable
+        onPress={handleChackOut}
           disabled={!restaurant?.isOpen}
           className="flex-row items-center justify-center py-3 border rounded-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{

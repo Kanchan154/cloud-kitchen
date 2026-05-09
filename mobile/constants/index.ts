@@ -1,4 +1,5 @@
 import { RoleOption } from "@/types";
+import Constants from "expo-constants";
 
 // colors
 export const AUTH_COLORS = {
@@ -39,8 +40,18 @@ export const ROLE_OPTIONS: RoleOption[] = [
     },
 ];
 
-export const BASE_API_URL = "https://lrcv0tlh-3000.inc1.devtunnels.ms/api";
-export const BASE_API_RESTAURANT_URL = "https://lrcv0tlh-3001.inc1.devtunnels.ms/api/restaurant";
+const expoExtra = (Constants.expoConfig?.extra ?? {}) as {
+    authApiUrl?: string;
+    restaurantApiUrl?: string;
+};
+
+const DEFAULT_AUTH_API_URL = "https://lrcv0tlh-3000.inc1.devtunnels.ms/api";
+const DEFAULT_RESTAURANT_API_URL = "https://lrcv0tlh-3001.inc1.devtunnels.ms/api/restaurant";
+
+export const BASE_API_URL = expoExtra.authApiUrl ? `${expoExtra.authApiUrl}/api` : DEFAULT_AUTH_API_URL;
+export const BASE_API_RESTAURANT_URL = expoExtra.restaurantApiUrl
+    ? `${expoExtra.restaurantApiUrl}/api/restaurant`
+    : DEFAULT_RESTAURANT_API_URL;
 
 // backend auth api keys
 export const AUTH_API_ENDPOINTS = {

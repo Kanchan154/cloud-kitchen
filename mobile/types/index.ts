@@ -94,3 +94,23 @@ export type CartInputType = {
     restaurantId: string;
     itemId: string;
 }
+
+// Address type
+export type AddressType = {
+    _id: string;
+    userId: string;
+    mobile: number;
+    formattedAddress: string;
+    location: {
+        type: "Point";
+        coordinates: [number, number];
+    }
+}
+
+// address input type
+export type AddressInputType = {
+    formattedAddress: string;
+    mobile: number;
+    latitude: number;
+    longitude: number;
+}
