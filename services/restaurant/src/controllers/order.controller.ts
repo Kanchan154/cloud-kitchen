@@ -1,3 +1,4 @@
+import { ENV } from "../config/ENV.js";
 import { AuthenticatedRequest } from "../middleware/isAuth.js";
 import TryCatch from "../middleware/trycatch.js";
 import AddressModel from "../models/address.model.js";
@@ -82,4 +83,20 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
     return res.status(200).json({ message: "Order created successfully", orderId: order._id.toString(), amount: total });
 });
 
- 
+export const fetchOrderForPayment = TryCatch(async (req, res) => {
+    if (req.headers["x-internal-key"] !== ENV.INTERNAL_SERVICE_KEY) {
+        return res.status(403).json({ message: "Forbidden" })
+    }
+    const { orderId } = req.params;
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+        return res.status(404).json({ message: "Order not found" })
+    }
+    if (order.paymentStatus !== "pending") return res.status(400).json({ message: "Order already paid" });
+
+    res.json({
+        orderId: orderId,
+        amount: order.total,
+        currency: "INR"
+    })
+})

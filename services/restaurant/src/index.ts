@@ -6,13 +6,19 @@ import restaurantRoute from './routes/restaurant.route.js'
 import menuItemRoute from './routes/menuItem.route.js';
 import cartRoute from "./routes/cart.route.js";
 import addressRoute from "./routes/address.route.js";
+import orderRoute from "./routes/order.route.js";
+import { connectRabbitMQ } from './config/rabbitMQ.js';
+import { startPaymentConsumer } from './config/payment.consumer.js';
 const app = express();
+await connectRabbitMQ();
+startPaymentConsumer();
 
 app.use(express.json());
 app.use("/api/restaurant", restaurantRoute);
 app.use('/api/restaurant/menu-item', menuItemRoute);
 app.use('/api/restaurant/cart', cartRoute);
 app.use('/api/restaurant/address', addressRoute);
+app.use('/api/restaurant/order', orderRoute);
 
 // Error route
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

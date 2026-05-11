@@ -4,7 +4,10 @@ import cloudinary from "cloudinary";
 import cors from 'cors'
 
 import uploadRoute from './routes/cloudinary.js';
+import paymentRoute from './routes/payment.route.js'
+import { connectRabbitMQ } from "./config/rabbitmq.js";
 const app = express();
+connectRabbitMQ()
 
 if (!ENV.CLOUD_NAME || !ENV.CLOUD_API_KEY || !ENV.CLOUD_SECRET_KEY) {
     throw new Error("Missing Cloudinary credentials");
@@ -35,6 +38,7 @@ cloudinary.v2.config({
 })
 
 app.use("/api/cloud", uploadRoute);
+app.use('/api/payment', paymentRoute);
 
 // Error route
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
