@@ -6,6 +6,10 @@ import { USER_ROLE } from "../types";
 import { ToastAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
+import { useCartStore } from "./cart.store";
+import { useAddressStore } from "./address.store";
+import { useCustomerStore } from "./customer.store";
+import { useSellerStore } from "./seller.store";
 
 const showToast = (message: unknown, fallback: string) => {
     const text = typeof message === "string" && message.trim().length > 0
@@ -295,12 +299,48 @@ export const useAuthStore = create<AUTHSTORE>((set, get) => ({
     },
     // logout controller
     logout: async () => {
-        await AsyncStorage.removeItem("token");
-        set({
-            user: null,
-            token: null,
-            isAuthenticated: false
-        })
-        showToast(null, "Logout Successfully");
+        try {
+            // Clear all AsyncStorage items
+            await AsyncStorage.multiRemove(['token']);
+
+            // Reset all zustand stores to their initial state
+            set({
+                user: null,
+                token: null,
+                isAuthenticated: false,
+                isCheckingAuth: false,
+            });
+
+            // Reset cart store
+            useCartStore.setState({
+                cartList: [],
+                subTotal: 0,
+                cartLenght: 0
+            });
+
+            // Reset address store
+            useAddressStore.setState({
+                addressList: [],
+                currentAddress: null
+            });
+
+            // Reset customer store
+            useCustomerStore.setState({
+                searchRestraunt: "",
+                restaurants: []
+            });
+
+            // Reset seller store
+            useSellerStore.setState({
+                myRestaurant: null,
+                isFetching: true,
+                menuItemList: []
+            });
+
+            showToast(null, "Logout Successfully");
+        } catch (error) {
+            console.error("Logout error:", error);
+            showToast(null, "Logout successfully");
+        }
     }
 }))

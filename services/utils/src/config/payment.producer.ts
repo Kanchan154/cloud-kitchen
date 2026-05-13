@@ -10,7 +10,7 @@ export const publishPaymentSuccess = async (payload: {
 
     channel.sendToQueue(ENV.PAYMENT_QUEUE!, Buffer.from(JSON.stringify({
         type: "PAYMENT_SUCCESS",
-        payload
+        data: payload
     })),
         { persistent: true }
     )

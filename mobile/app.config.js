@@ -10,6 +10,7 @@ const razorpayId = process.env.EXPO_PUBLIC_RAZORPAY_ID || '';
 const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ID || process.env.GOOGLE_MAPS_API_KEY || '';
 const authApiUrl = process.env.EXPO_PUBLIC_AUTH_URL || '';
 const restaurantApiUrl = process.env.EXPO_PUBLIC_RESTAURANT_URL || '';
+const utilsApiUrl = process.env.EXPO_PUBLIC_UTILS_URL || '';
 
 module.exports = {
     ...baseConfig,
@@ -32,6 +33,7 @@ module.exports = {
             googleMapsApiKey,
             authApiUrl,
             restaurantApiUrl,
+            utilsApiUrl
         },
     },
 };

@@ -22,13 +22,14 @@ export const createRazorpayOrder = async (req: Request, res: Response) => {
     });
     res.json({
         razorpayOrderId: razorpayOrder.id,
-        key: ENV.RAZORPAY_KEY_SECRET
+        key: ENV.RAZORPAY_KEY_ID
     });
 }
 
 // verify razorpay payment
 export const verifyRazorpayPayment = async (req: Request, res: Response) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+    console.log(razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId)
     const isValid = verifyRazorpaySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
 
     if (!isValid) return res.status(400).json({ message: "Payment verification failed" });
@@ -39,5 +40,5 @@ export const verifyRazorpayPayment = async (req: Request, res: Response) => {
         provider: "razorpay"
     })
 
-    res.status(200).json({ message: "Payment verified successfully" });
+    res.status(200).json({ message: "Payment verified successfully 🎉" });
 }

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Alert, Image, ScrollView } from 'react-native'
+import { View, Text, Pressable, Alert, Image, ScrollView, ToastAndroid } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CartItemType, IRestaurant } from '@/types';
@@ -6,18 +6,29 @@ import AddressList from '@/components/customer/AddressList';
 import Background from '@/components/shared/Background';
 import { useAddressStore } from '@/store/address.store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AUTH_COLORS } from '@/constants';
+import { AUTH_COLORS, UTILS_ENDPOINTS } from '@/constants';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from 'react-native-reanimated';
 import { useCartStore } from '@/store/cart.store';
 import { getDistanceinKM } from '@/services/getDistance';
+import usePaymentHandlers from '@/hooks/paymentHook';
+import axios, { AxiosError } from 'axios';
+import { useAuthStore } from '@/store/auth.store';
+import RazorpayCheckout from "react-native-razorpay";
 
+const showToast = (message: unknown, fallback: string) => {
+    const text = typeof message === "string" && message.trim().length > 0
+        ? message
+        : fallback;
+    ToastAndroid.show(text, ToastAndroid.SHORT);
+};
 const CheckOutPage = () => {
     const { restaurant, total } = useLocalSearchParams();
     const restaurantObj: IRestaurant = JSON.parse(Array.isArray(restaurant) ? restaurant[0] : restaurant);
     const [showAddresses, setShowAddresses] = useState(false);
     const [showPay, setShowPay] = useState(false);
     const router = useRouter();
-    const { } = useCartStore();
+    const { createOrder } = usePaymentHandlers();
+    const { user } = useAuthStore();
 
     // animations
     const topAnim = useSharedValue(0);
@@ -42,15 +53,73 @@ const CheckOutPage = () => {
     }));
 
     const { currentAddress } = useAddressStore();
-    const totalValue = Number(Array.isArray(total) ? total[0] : total) || 0;
-    const formattedTotal = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(totalValue);
     const { cartList, subTotal } = useCartStore();
     const safeSubTotal = Number(subTotal ?? 0);
     const deliveryFee = safeSubTotal >= 500 ? 0 : 50;
     const tax = safeSubTotal * 0.05;
     const orderTotal = safeSubTotal + deliveryFee + tax;
     const formattedOrderTotal = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(orderTotal);
-    const distance = getDistanceinKM(currentAddress?.location?.coordinates[0] ?? 0, currentAddress?.location?.coordinates[1] ?? 0, restaurantObj.autoLocation?.coordinates[0] ?? 0, restaurantObj.autoLocation?.coordinates[1] ?? 0);
+    const distance = currentAddress ? getDistanceinKM(currentAddress?.location?.coordinates[0] ?? 0, currentAddress?.location?.coordinates[1] ?? 0, restaurantObj.autoLocation?.coordinates[0] ?? 0, restaurantObj.autoLocation?.coordinates[1] ?? 0) : 0;
+
+    // payment with razorpay
+    const payWithRazorPay = async () => {
+        try {
+            const order = await createOrder('razorpay', distance);
+
+            if (!order) return;
+
+            const { orderId, amount } = order;
+            const { data } = await axios.post(`${UTILS_ENDPOINTS.CREATE_PAYMENT}`, {
+                orderId
+            });
+
+            const { razorpayOrderId, key } = data;
+            const options = {
+                key: key ?? process.env.EXPO_PUBLIC_RAZORPAY_ID!,
+                amount: amount * 100,
+                currency: "INR",
+                name: "Zomato",
+                prefill: {
+                    contact: user?.email,
+                    name: user?.name,
+                },
+                description: "Order Payment",
+                order_id: razorpayOrderId,
+                theme: {
+                    color: AUTH_COLORS.primary,
+                }
+            };
+
+            if (!RazorpayCheckout?.open) {
+                showToast("Razorpay not found", "Failed to start payment");
+                return;
+            }
+
+            const response = await RazorpayCheckout.open(options);
+
+            const verifyResponse = await axios.post(UTILS_ENDPOINTS.VERIFY_PAYMENT, {
+                orderId,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+            });
+
+            if (verifyResponse.status === 400) {
+                throw new Error(verifyResponse.data.message);
+            }
+
+            ToastAndroid.show(verifyResponse.data.message, ToastAndroid.SHORT);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                showToast(error.response?.data?.message, "Payment failed 💀");
+            } else if (error instanceof Error) {
+                showToast(error.message, "Payment failed 💀");
+            } else {
+                showToast(error, "Payment failed 💀");
+            }
+        }
+    }
+
     return (
         <Background>
             <View className="justify-between flex-1">
@@ -183,7 +252,7 @@ const CheckOutPage = () => {
                                         return;
                                     }
                                     setShowPay(true);
-                                    Alert.alert('Proceed to pay', `Pay ${formattedOrderTotal} for ${(restaurantObj as any)?.name ?? 'your order'}`);
+                                    payWithRazorPay();
                                 }}
                                 className="px-4 py-2 rounded-xl"
                                 style={{ backgroundColor: AUTH_COLORS.primary }}

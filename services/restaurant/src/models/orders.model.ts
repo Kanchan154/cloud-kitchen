@@ -24,7 +24,7 @@ export interface IOrder extends Document {
     addressId: string;
     deliveryAddress: {
         formattedAddress: string;
-        moble: number;
+        mobile: number;
         latitute: number;
         longitude: number;
     }
@@ -115,7 +115,7 @@ const OrderSchema = new mongoose.Schema<IOrder>({
             type: String,
             required: true
         },
-        moble: {
+        mobile: {
             type: Number,
             required: true
         },

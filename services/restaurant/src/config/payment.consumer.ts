@@ -14,7 +14,13 @@ export const startPaymentConsumer = async () => {
                 channel.ack(msg);
                 return;
             }
-            const { orderId } = event.data;
+            const paymentData = event.data ?? event.payload;
+            const { orderId } = paymentData ?? {};
+
+            if (!orderId) {
+                throw new Error("Missing orderId in payment event");
+            }
+
             const order = await OrderModel.findOneAndUpdate({
                 _id: orderId,
                 paymentStatus: { $ne: "paid" }
@@ -35,11 +41,13 @@ export const startPaymentConsumer = async () => {
             }
 
             console.log({ message: "Order created successfully", orderId: order._id.toString() });
+            channel.ack(msg);
 
 
             // socket - todo
         } catch (error) {
             console.error("🔴Error in payment consumer", error);
+            channel.ack(msg);
         }
     })
 }

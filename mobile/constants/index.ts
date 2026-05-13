@@ -43,15 +43,18 @@ export const ROLE_OPTIONS: RoleOption[] = [
 const expoExtra = (Constants.expoConfig?.extra ?? {}) as {
     authApiUrl?: string;
     restaurantApiUrl?: string;
+    utilsApiUrl?: string;
 };
 
 const DEFAULT_AUTH_API_URL = "https://lrcv0tlh-3000.inc1.devtunnels.ms/api";
 const DEFAULT_RESTAURANT_API_URL = "https://lrcv0tlh-3001.inc1.devtunnels.ms/api/restaurant";
+const DEFAULT_UTILS_API_URL = 'https://lrcv0tlh-3002.inc1.devtunnels.ms/api';
 
 export const BASE_API_URL = expoExtra.authApiUrl ? `${expoExtra.authApiUrl}/api` : DEFAULT_AUTH_API_URL;
 export const BASE_API_RESTAURANT_URL = expoExtra.restaurantApiUrl
     ? `${expoExtra.restaurantApiUrl}/api/restaurant`
     : DEFAULT_RESTAURANT_API_URL;
+export const BASE_API_UTILS_URL = expoExtra.utilsApiUrl ? `${expoExtra.utilsApiUrl}/api` : DEFAULT_UTILS_API_URL;
 
 // backend auth api keys
 export const AUTH_API_ENDPOINTS = {
@@ -86,5 +89,13 @@ export const RESTAURANT_API_ENDPOINTS = {
     // address apis
     ADD_ADDRESS: `${BASE_API_RESTAURANT_URL}/address/add-address`,
     GET_ALL_ADDRESSES: `${BASE_API_RESTAURANT_URL}/address/get-all`,
-    DELETE_ADDRESS: `${BASE_API_RESTAURANT_URL}/address/delete-address`
+    DELETE_ADDRESS: `${BASE_API_RESTAURANT_URL}/address/delete-address`,
+
+    // order apis
+    CREATE_ORDER: `${BASE_API_RESTAURANT_URL}/order/new`,
+}
+
+export const UTILS_ENDPOINTS = {
+    CREATE_PAYMENT: `${BASE_API_UTILS_URL}/payment/create`,
+    VERIFY_PAYMENT: `${BASE_API_UTILS_URL}/payment/verify`,
 }
