@@ -100,3 +100,11 @@ export const fetchOrderForPayment = TryCatch(async (req, res) => {
         currency: "INR"
     })
 })
+
+// get all orders
+export const fetchOrders = TryCatch(async (req: AuthenticatedRequest, res) => {
+    const user = req.user;
+    if (!user) return res.status(403).json({ message: "Unauthorized - User not found" });
+    const orders = await OrderModel.find({ userId: user._id }).sort({ createdAt: -1 });
+    res.status(200).json({ orders });
+})

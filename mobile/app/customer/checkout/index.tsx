@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Alert, Image, ScrollView, ToastAndroid } from 'react-native'
+import { View, Text, Pressable, Alert, Image, ScrollView, ToastAndroid, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CartItemType, IRestaurant } from '@/types';
@@ -53,7 +53,8 @@ const CheckOutPage = () => {
     }));
 
     const { currentAddress } = useAddressStore();
-    const { cartList, subTotal } = useCartStore();
+    const { cartList, subTotal, clearCart } = useCartStore();
+    const [isLoading, setisLoading] = useState(false);
     const safeSubTotal = Number(subTotal ?? 0);
     const deliveryFee = safeSubTotal >= 500 ? 0 : 50;
     const tax = safeSubTotal * 0.05;
@@ -64,6 +65,7 @@ const CheckOutPage = () => {
     // payment with razorpay
     const payWithRazorPay = async () => {
         try {
+            setisLoading(true);
             const order = await createOrder('razorpay', distance);
 
             if (!order) return;
@@ -109,6 +111,15 @@ const CheckOutPage = () => {
             }
 
             ToastAndroid.show(verifyResponse.data.message, ToastAndroid.SHORT);
+            // if order payment is successful then clear the cart items
+            await clearCart();
+            router.push({
+                pathname: '/customer/paymentSuccess',
+                params: {
+                    paymentId: response.razorpay_payment_id,
+                    amount: amount
+                }
+            })
         } catch (error) {
             if (error instanceof AxiosError) {
                 showToast(error.response?.data?.message, "Payment failed 💀");
@@ -117,6 +128,9 @@ const CheckOutPage = () => {
             } else {
                 showToast(error, "Payment failed 💀");
             }
+        }
+        finally {
+            setisLoading(false);
         }
     }
 
@@ -246,6 +260,7 @@ const CheckOutPage = () => {
                             </Pressable>
 
                             <Pressable
+                                disabled={!currentAddress || isLoading}
                                 onPress={() => {
                                     if (!currentAddress) {
                                         Alert.alert('No address selected', 'Please select a delivery address first.');
@@ -257,7 +272,9 @@ const CheckOutPage = () => {
                                 className="px-4 py-2 rounded-xl"
                                 style={{ backgroundColor: AUTH_COLORS.primary }}
                             >
-                                <Text className="text-sm font-semibold text-black">Pay</Text>
+                                <Text className="text-sm font-semibold text-black">{
+                                    isLoading ? <ActivityIndicator size="small" color="white" /> : 'Pay Now'
+                                }</Text>
                             </Pressable>
                         </View>
                     </View>

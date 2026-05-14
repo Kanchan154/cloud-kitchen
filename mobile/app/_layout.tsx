@@ -19,6 +19,8 @@ export default function RootLayout() {
         <Stack.Screen name="rider/(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="customer/restaurant/[restaurant]" options={{ headerShown: false }} />
         <Stack.Screen name="customer/checkout/index" options={{ headerShown: false }} />
+        <Stack.Screen name="customer/orders/index" options={{ headerShown: false }} />
+        <Stack.Screen name="customer/paymentSuccess/index" options={{ headerShown: false }} />
       </Stack>
     </ProtectedRoute>
   );
