@@ -11,6 +11,7 @@ const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_ID || process.env.G
 const authApiUrl = process.env.EXPO_PUBLIC_AUTH_URL || '';
 const restaurantApiUrl = process.env.EXPO_PUBLIC_RESTAURANT_URL || '';
 const utilsApiUrl = process.env.EXPO_PUBLIC_UTILS_URL || '';
+const realtimeApiUrl = process.env.EXPO_PUBLIC_REALTIME_URL || '';
 
 module.exports = {
     ...baseConfig,
@@ -33,7 +34,8 @@ module.exports = {
             googleMapsApiKey,
             authApiUrl,
             restaurantApiUrl,
-            utilsApiUrl
+            utilsApiUrl,
+            realtimeApiUrl
         },
     },
 };

@@ -44,17 +44,20 @@ const expoExtra = (Constants.expoConfig?.extra ?? {}) as {
     authApiUrl?: string;
     restaurantApiUrl?: string;
     utilsApiUrl?: string;
+    realtimeApiUrl?: string;
 };
 
 const DEFAULT_AUTH_API_URL = "https://lrcv0tlh-3000.inc1.devtunnels.ms/api";
 const DEFAULT_RESTAURANT_API_URL = "https://lrcv0tlh-3001.inc1.devtunnels.ms/api/restaurant";
 const DEFAULT_UTILS_API_URL = 'https://lrcv0tlh-3002.inc1.devtunnels.ms/api';
+const DEFAULT_REALTIME_API_URL = 'https://lrcv0tlh-3003.inc1.devtunnels.ms';
 
 export const BASE_API_URL = expoExtra.authApiUrl ? `${expoExtra.authApiUrl}/api` : DEFAULT_AUTH_API_URL;
 export const BASE_API_RESTAURANT_URL = expoExtra.restaurantApiUrl
     ? `${expoExtra.restaurantApiUrl}/api/restaurant`
     : DEFAULT_RESTAURANT_API_URL;
 export const BASE_API_UTILS_URL = expoExtra.utilsApiUrl ? `${expoExtra.utilsApiUrl}/api` : DEFAULT_UTILS_API_URL;
+export const BASE_API_REALTIME_URL = expoExtra.realtimeApiUrl ? `${expoExtra.realtimeApiUrl}` : DEFAULT_REALTIME_API_URL;
 
 // backend auth api keys
 export const AUTH_API_ENDPOINTS = {
